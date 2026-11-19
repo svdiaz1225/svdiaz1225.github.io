@@ -1,0 +1,1682 @@
+<!DOCTYPE html>
+<html lang="es-MX">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<!-- Seguridad: la app solo puede pedir sus propios archivos ('self'), nunca
+     datos a terceros; no puede enviar formularios a ningún lado y no carga
+     recursos externos salvo la tipografía. Respaldo técnico del aviso de privacidad. -->
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'unsafe-inline'; style-src 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data:; connect-src 'self'; worker-src 'self'; manifest-src 'self'; form-action 'none'; base-uri 'none'; frame-src 'none'; object-src 'none'">
+<meta name="referrer" content="no-referrer">
+<title>Ayuda a mi salud</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#2f7d5d">
+<meta name="description" content="Herramienta auxiliar para registrar comidas, agua y movimiento, con consejos de fuentes oficiales. No es un dispositivo médico.">
+<link rel="icon" href="favicon-32.png" sizes="32x32">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Mi salud">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --verde:#2f7d5d; --verde-claro:#e7f3ec; --verde-borde:#bfdfcd;
+  --maiz:#e0a52b; --maiz-claro:#fdf4e2;
+  --frijol:#8c5a3b; --frijol-claro:#f6eee8;
+  --jamaica:#b2446a; --jamaica-claro:#fbecf1;
+  --agua:#2b7fa8; --agua-claro:#e6f2f8;
+  --bg:#f7f8f6; --card:#ffffff; --tinta:#1d2521; --tinta-2:#5b6a62;
+  --borde:#e4e8e4; --sombra:0 1px 2px rgba(29,37,33,.05),0 6px 18px rgba(29,37,33,.05);
+  --r:18px; --r-s:12px;
+  --safe-t:env(safe-area-inset-top,0px); --safe-b:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme:dark){
+  :root{
+    --verde:#6fcc9c; --verde-claro:#16281f; --verde-borde:#2d4a3a;
+    --maiz:#e8bb5c; --maiz-claro:#2a2214;
+    --frijol:#cc9b7a; --frijol-claro:#271c16;
+    --jamaica:#e68aa7; --jamaica-claro:#2b1620;
+    --agua:#7cc3e4; --agua-claro:#132430;
+    --bg:#10140f; --card:#191e18; --tinta:#eef2ee; --tinta-2:#a3b0a8;
+    --borde:#2a312a; --sombra:0 1px 2px rgba(0,0,0,.3),0 6px 18px rgba(0,0,0,.25);
+  }
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;padding:0}
+body{
+  font-family:'Plus Jakarta Sans',system-ui,-apple-system,'Segoe UI',sans-serif;
+  background:var(--bg); color:var(--tinta); line-height:1.45;
+  padding-bottom:calc(84px + var(--safe-b));
+  -webkit-font-smoothing:antialiased; overflow-x:hidden;
+}
+h1,h2,h3,h4{margin:0;line-height:1.25;font-weight:800;letter-spacing:-.01em}
+p{margin:0}
+button{font-family:inherit;font-size:inherit;cursor:pointer;border:none;background:none;color:inherit}
+input,select,textarea{font-family:inherit;font-size:16px;color:var(--tinta)}
+.wrap{max-width:560px;margin:0 auto;padding:0 16px}
+
+header{
+  position:sticky;top:0;z-index:40;background:var(--bg);
+  background:color-mix(in srgb,var(--bg) 88%,transparent);
+  backdrop-filter:blur(12px);border-bottom:1px solid var(--borde);
+  padding-top:var(--safe-t);
+}
+.head-in{display:flex;align-items:center;gap:10px;padding:11px 0}
+.head-txt{flex:1;min-width:0}
+.head-txt .hola{font-size:17px;font-weight:800}
+.head-txt .fecha{font-size:12.5px;color:var(--tinta-2);text-transform:capitalize}
+.racha{display:flex;align-items:center;gap:5px;background:var(--maiz-claro);color:var(--maiz);
+  border:1px solid color-mix(in srgb,var(--maiz) 35%,transparent);
+  padding:6px 10px;border-radius:999px;font-weight:800;font-size:13px;white-space:nowrap}
+.icon-btn{width:38px;height:38px;border-radius:12px;background:var(--card);border:1px solid var(--borde);
+  display:grid;place-items:center;font-size:16px;flex-shrink:0}
+.aro{width:42px;height:42px;flex-shrink:0;position:relative}
+.aro svg{transform:rotate(-90deg)}
+.aro span{position:absolute;inset:0;display:grid;place-items:center;font-size:10.5px;font-weight:800}
+
+.card{background:var(--card);border:1px solid var(--borde);border-radius:var(--r);padding:16px;box-shadow:var(--sombra);margin-bottom:12px}
+.card-t{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:12px}
+.card-t h2{font-size:15.5px}
+.card-t .sub{font-size:12px;color:var(--tinta-2);font-weight:600;text-align:right}
+.sec-t{font-size:12px;font-weight:800;letter-spacing:.07em;text-transform:uppercase;color:var(--tinta-2);margin:20px 0 8px}
+
+/* recordatorio */
+.rec{border:1.5px solid color-mix(in srgb,var(--maiz) 45%,transparent);background:var(--maiz-claro)}
+.rec .card-t h2{color:var(--maiz)}
+.rec-fila{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid color-mix(in srgb,var(--maiz) 20%,transparent)}
+.rec-fila:last-of-type{border-bottom:none}
+.rec-ico{width:30px;height:30px;border-radius:9px;display:grid;place-items:center;font-size:15px;background:var(--card);flex-shrink:0}
+.rec-txt{flex:1;min-width:0;font-size:13.5px;font-weight:700}
+.rec-add{background:var(--maiz);color:#fff;border-radius:9px;padding:6px 11px;font-size:12.5px;font-weight:800;flex-shrink:0}
+.frase{font-size:13.5px;font-weight:700;font-style:italic;color:var(--tinta);margin-top:12px;line-height:1.5}
+.listo{border:1.5px solid var(--verde-borde);background:var(--verde-claro)}
+.listo .card-t h2{color:var(--verde)}
+
+.grupo{display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--borde)}
+.grupo:last-child{border-bottom:none}
+.g-emoji{width:40px;height:40px;border-radius:12px;display:grid;place-items:center;font-size:19px;flex-shrink:0;background:var(--verde-claro)}
+.g-info{flex:1;min-width:0}
+.g-nom{font-weight:700;font-size:14.5px}
+.g-meta{font-size:11.5px;color:var(--tinta-2);font-weight:600}
+.barra{height:7px;background:var(--borde);border-radius:99px;overflow:hidden;margin-top:6px}
+.barra i{display:block;height:100%;border-radius:99px;background:var(--verde);transition:width .4s cubic-bezier(.2,.8,.2,1)}
+.g-ctrl{display:flex;align-items:center;gap:8px;flex-shrink:0}
+.pill-btn{width:34px;height:34px;border-radius:11px;border:1px solid var(--borde);background:var(--bg);
+  display:grid;place-items:center;font-size:17px;font-weight:800;color:var(--tinta-2);transition:transform .1s}
+.pill-btn:active{transform:scale(.9)}
+.pill-btn.mas{background:var(--verde);color:#fff;border-color:transparent}
+.cuenta{min-width:26px;text-align:center;font-weight:800;font-size:16px}
+.ok-tag{font-size:10.5px;font-weight:800;color:var(--verde);background:var(--verde-claro);padding:2px 6px;border-radius:5px;margin-left:5px}
+
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{border:1px solid var(--borde);background:var(--bg);padding:8px 13px;border-radius:999px;font-size:13.5px;font-weight:700;color:var(--tinta-2);transition:transform .1s}
+.chip:active{transform:scale(.95)}
+.chip[aria-pressed="true"]{background:var(--verde);border-color:transparent;color:#fff}
+.chip.mini{padding:6px 11px;font-size:12.5px}
+
+.btn{display:block;width:100%;background:var(--verde);color:#fff;font-weight:800;font-size:15px;padding:14px;border-radius:14px;text-align:center;transition:transform .1s}
+.btn:active{transform:scale(.98)}
+.btn.sec{background:var(--bg);color:var(--tinta);border:1px solid var(--borde)}
+.btn.peq{padding:10px;font-size:13.5px;border-radius:12px}
+.fila-btn{display:flex;gap:8px}
+
+.vasos{display:flex;flex-wrap:wrap;gap:7px;margin-top:10px}
+.vaso{width:30px;height:38px;border-radius:5px 5px 11px 11px;border:2px solid var(--agua);background:transparent;position:relative;overflow:hidden;transition:transform .12s}
+.vaso:active{transform:scale(.88)}
+.vaso.on{background:var(--agua)}
+.vaso.on::after{content:'';position:absolute;inset:0;background:linear-gradient(transparent 40%,rgba(255,255,255,.25))}
+.num-grande{font-size:30px;font-weight:800;letter-spacing:-.02em;line-height:1}
+.num-grande small{font-size:13px;font-weight:700;color:var(--tinta-2)}
+
+.comida{display:flex;gap:11px;padding:12px;border:1px solid var(--borde);border-radius:var(--r-s);margin-bottom:8px;background:var(--bg)}
+.c-hora{font-size:11px;font-weight:800;color:var(--tinta-2);text-align:center;min-width:46px}
+.c-cuerpo{flex:1;min-width:0}
+.c-nom{font-weight:700;font-size:14.5px;word-break:break-word}
+.c-grupos{font-size:11.5px;color:var(--tinta-2);margin-top:3px}
+.tag-sello{display:inline-block;background:#111;color:#fff;font-size:10px;font-weight:800;padding:2px 7px;border-radius:5px;margin-top:5px}
+.vacio{text-align:center;padding:26px 14px;color:var(--tinta-2);font-size:13.5px}
+.borrar{color:var(--jamaica);font-size:12px;font-weight:800;align-self:flex-start}
+
+label.lb{display:block;font-size:12px;font-weight:800;color:var(--tinta-2);margin:12px 0 6px;text-transform:uppercase;letter-spacing:.04em}
+.inp{width:100%;padding:13px;border:1px solid var(--borde);border-radius:12px;background:var(--bg);outline:none}
+.inp:focus{border-color:var(--verde)}
+.inp-fila{display:flex;gap:8px}
+
+.plato-fila{display:flex;align-items:center;gap:14px}
+.leyenda{flex:1;display:grid;gap:5px;font-size:12px;font-weight:600}
+.leyenda div{display:flex;align-items:center;gap:7px}
+.pt{width:10px;height:10px;border-radius:3px;flex-shrink:0}
+
+.semana{display:flex;align-items:flex-end;justify-content:space-between;gap:5px;height:118px;margin-top:6px}
+.dia-col{flex:1;display:flex;flex-direction:column;align-items:center;gap:5px;height:100%}
+.dia-barra{width:100%;background:var(--borde);border-radius:7px;flex:1;display:flex;align-items:flex-end;overflow:hidden}
+.dia-barra i{display:block;width:100%;background:var(--verde);border-radius:7px;transition:height .4s cubic-bezier(.2,.8,.2,1)}
+.dia-lb{font-size:10.5px;font-weight:800;color:var(--tinta-2)}
+.dia-col.hoy .dia-lb{color:var(--verde)}
+
+.logro{display:flex;gap:11px;align-items:center;padding:10px 0;border-bottom:1px solid var(--borde)}
+.logro:last-child{border-bottom:none}
+.l-med{width:38px;height:38px;border-radius:50%;display:grid;place-items:center;font-size:17px;background:var(--borde);flex-shrink:0;filter:grayscale(1);opacity:.5}
+.logro.on .l-med{background:var(--maiz-claro);filter:none;opacity:1}
+.l-nom{font-weight:700;font-size:13.5px}
+.l-desc{font-size:11.5px;color:var(--tinta-2)}
+
+.consejo{border:1px solid var(--borde);border-radius:var(--r-s);padding:14px;margin-bottom:10px;background:var(--bg)}
+.consejo h3{font-size:14.5px;margin-bottom:6px}
+.consejo p{font-size:13.5px;color:var(--tinta-2)}
+.fuente{margin-top:9px;font-size:11px;font-weight:700;color:var(--verde);display:block;word-break:break-word}
+.dato{display:inline-block;background:var(--verde-claro);color:var(--verde);border:1px solid var(--verde-borde);
+  font-weight:800;font-size:12px;padding:3px 9px;border-radius:7px;margin:4px 4px 0 0}
+.sello-ej{display:inline-block;background:#111;color:#fff;border-radius:8px;padding:5px 9px;font-size:10.5px;font-weight:800;margin:3px 4px 0 0;line-height:1.1;text-align:center}
+
+/* calendario de consejos */
+.cal{display:grid;grid-template-columns:repeat(7,1fr);gap:6px}
+.cal-d{aspect-ratio:1;border:1px solid var(--borde);border-radius:11px;background:var(--bg);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;
+  font-size:13px;font-weight:800;color:var(--tinta-2);position:relative;transition:transform .1s}
+.cal-d:active{transform:scale(.92)}
+.cal-d.hoy{border-color:var(--verde);border-width:2px;color:var(--verde);background:var(--verde-claro)}
+.cal-d.visto{color:var(--tinta)}
+.cal-d i{font-size:9px;font-style:normal;line-height:1;height:9px}
+.cal-leg{display:flex;gap:14px;flex-wrap:wrap;font-size:11.5px;color:var(--tinta-2);font-weight:600;margin-top:11px}
+
+.nivel{display:flex;gap:10px;align-items:center;padding:9px 0;border-bottom:1px solid var(--borde);font-size:13px}
+.nivel:last-child{border-bottom:none}
+.n-num{width:24px;height:24px;border-radius:7px;background:var(--agua-claro);color:var(--agua);display:grid;place-items:center;font-weight:800;font-size:12px;flex-shrink:0}
+.n-txt{flex:1}
+.n-cant{font-weight:800;font-size:12px;color:var(--tinta-2);text-align:right;flex-shrink:0;max-width:40%}
+
+.gasto-top{display:flex;align-items:baseline;gap:8px;flex-wrap:wrap}
+.item{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--borde)}
+.item:last-child{border-bottom:none}
+.i-nom{flex:1;min-width:0;font-size:14px;font-weight:700;word-break:break-word}
+.i-sub{font-size:11.5px;color:var(--tinta-2);font-weight:600}
+.i-precio{font-weight:800;font-size:14px;white-space:nowrap}
+.repart{display:grid;gap:7px;margin-top:10px}
+.rep-fila{display:flex;align-items:center;gap:9px;font-size:12px;font-weight:700}
+.rep-barra{flex:1;height:7px;background:var(--borde);border-radius:99px;overflow:hidden}
+.rep-barra i{display:block;height:100%;border-radius:99px}
+
+.menu-dia{border:1px solid var(--borde);border-radius:var(--r-s);padding:12px;margin-bottom:9px;background:var(--bg)}
+.menu-dia h4{font-size:13px;color:var(--verde);margin-bottom:8px;text-transform:uppercase;letter-spacing:.05em}
+.menu-l{display:flex;gap:8px;align-items:center;margin-bottom:6px}
+.menu-l span{font-size:11px;font-weight:800;color:var(--tinta-2);width:62px;flex-shrink:0;text-transform:uppercase}
+.menu-l input{flex:1;padding:9px;border:1px solid var(--borde);border-radius:9px;background:var(--card);font-size:13.5px;outline:none}
+
+.aviso{background:var(--maiz-claro);border:1px solid color-mix(in srgb,var(--maiz) 35%,transparent);
+  border-radius:var(--r-s);padding:13px;font-size:12.5px;color:var(--tinta);line-height:1.5}
+.legal-p{font-size:13px;color:var(--tinta-2);margin-bottom:10px;line-height:1.55}
+.legal-p b{color:var(--tinta)}
+ul.lista{margin:0;padding-left:18px;font-size:13px;color:var(--tinta-2);line-height:1.6}
+ul.lista li{margin-bottom:6px}
+a{color:var(--verde);font-weight:700;text-decoration:none;word-break:break-word}
+
+nav{position:fixed;left:0;right:0;bottom:0;z-index:50;background:var(--card);
+  background:color-mix(in srgb,var(--card) 94%,transparent);
+  backdrop-filter:blur(14px);border-top:1px solid var(--borde);padding-bottom:var(--safe-b)}
+.nav-in{max-width:560px;margin:0 auto;display:flex}
+.nav-b{flex:1;padding:9px 2px 10px;display:flex;flex-direction:column;align-items:center;gap:3px;
+  font-size:10.5px;font-weight:800;color:var(--tinta-2);position:relative}
+.nav-b i{font-size:19px;font-style:normal;line-height:1}
+.nav-b[aria-current="true"]{color:var(--verde)}
+.punto{position:absolute;top:7px;right:calc(50% - 16px);width:8px;height:8px;border-radius:50%;background:var(--maiz);display:none}
+.punto.on{display:block}
+
+.modal{position:fixed;inset:0;z-index:100;background:rgba(10,14,11,.55);display:none;align-items:flex-end;justify-content:center}
+.modal.on{display:flex}
+.modal-box{background:var(--card);border-radius:22px 22px 0 0;width:100%;max-width:560px;max-height:92vh;overflow-y:auto;
+  padding:22px 18px calc(22px + var(--safe-b));box-shadow:0 -10px 40px rgba(0,0,0,.25);animation:sube .25s cubic-bezier(.2,.8,.2,1)}
+@keyframes sube{from{transform:translateY(40px)}to{transform:none}}
+.modal-box h2{font-size:19px;margin-bottom:10px}
+.modal-box .cerrar{width:100%;text-align:center;color:var(--tinta-2);font-weight:800;font-size:13.5px;padding:14px 0 0}
+.vista{display:none}
+.vista.on{display:block;animation:apar .22s ease}
+@keyframes apar{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+.mini-nota{font-size:11.5px;color:var(--tinta-2);margin-top:8px;line-height:1.5}
+.pesos{font-size:13px;color:var(--tinta-2);font-weight:700}
+.toast{position:fixed;left:50%;transform:translateX(-50%) translateY(20px);bottom:calc(96px + var(--safe-b));
+  background:var(--tinta);color:var(--bg);padding:11px 18px;border-radius:999px;font-size:13px;font-weight:700;
+  z-index:200;opacity:0;transition:.25s;pointer-events:none;max-width:88vw;text-align:center}
+.toast.on{opacity:1;transform:translateX(-50%) translateY(0)}
+.papelito{position:fixed;top:-12px;width:9px;height:14px;z-index:150;pointer-events:none;border-radius:2px}
+@keyframes cae{to{transform:translateY(105vh) rotate(540deg);opacity:.9}}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="wrap head-in">
+    <div class="aro" id="aroDia" aria-label="Metas del día"></div>
+    <div class="head-txt">
+      <div class="hola" id="saludo">Hola</div>
+      <div class="fecha" id="fechaHoy">—</div>
+    </div>
+    <div class="racha" id="racha">🔥 0</div>
+    <button class="icon-btn" id="btnLegal" aria-label="Aviso legal y privacidad">ⓘ</button>
+  </div>
+</header>
+
+<main class="wrap">
+
+<!-- ══════════ HOY ══════════ -->
+<section class="vista on" id="v-hoy">
+
+  <div id="zonaRecordatorio"></div>
+
+  <div class="card" style="background:linear-gradient(135deg,var(--verde-claro),transparent)">
+    <div class="card-t"><h2>Tu plato de hoy</h2><span class="sub" id="platoPct">0%</span></div>
+    <div class="plato-fila">
+      <svg width="110" height="110" viewBox="0 0 42 42" id="svgPlato" aria-label="Avance de grupos de alimentos"></svg>
+      <div class="leyenda" id="leyPlato"></div>
+    </div>
+    <p class="mini-nota" id="platoMsg"></p>
+  </div>
+
+  <div class="card">
+    <div class="card-t"><h2>Porciones del día</h2><span class="sub">Guías Alimentarias<br>SSA e INSP</span></div>
+    <div id="listaGrupos"></div>
+    <p class="mini-nota">Los rangos de porciones varían según edad y sexo; la guía oficial los presenta como intervalos, no como una meta exacta igual para todos.</p>
+  </div>
+
+  <div class="card">
+    <div class="card-t"><h2>Agua natural</h2><span class="sub">Meta: 8 vasos o más</span></div>
+    <div style="display:flex;align-items:center;gap:14px">
+      <div class="num-grande"><span id="aguaN">0</span><small>/8+</small></div>
+      <div class="fila-btn" style="flex:1">
+        <button class="btn peq sec" data-agua="-1">−</button>
+        <button class="btn peq" data-agua="1">+ Un vaso</button>
+      </div>
+    </div>
+    <div class="vasos" id="vasos"></div>
+    <p class="mini-nota">Toca cualquier vaso para marcar hasta ahí.</p>
+  </div>
+
+  <div class="card">
+    <div class="card-t"><h2>Movimiento</h2><span class="sub">150 a 300 min<br>por semana</span></div>
+    <div style="display:flex;align-items:center;gap:14px;margin-bottom:10px">
+      <div class="num-grande"><span id="actHoy">0</span><small> min hoy</small></div>
+      <div class="num-grande" style="margin-left:auto;text-align:right"><span id="actSem">0</span><small> min / semana</small></div>
+    </div>
+    <div class="barra"><i id="barraAct" style="width:0%"></i></div>
+    <div class="chips" style="margin-top:12px">
+      <button class="chip mini" data-act="10">+10 min</button>
+      <button class="chip mini" data-act="15">+15 min</button>
+      <button class="chip mini" data-act="30">+30 min</button>
+      <button class="chip mini" data-act="-10">−10 min</button>
+    </div>
+    <p class="mini-nota">Caminar, bicicleta, baile, jardinería y labores del hogar cuentan como actividad física. La meta diaria de 20 minutos es solo la forma en que esta app reparte en la semana el rango oficial de 150 a 300 minutos: la recomendación de la OMS es semanal, no diaria.</p>
+  </div>
+
+  <div class="card">
+    <div class="card-t"><h2>Consejo del día <span id="numDia" style="color:var(--tinta-2);font-weight:700"></span></h2></div>
+    <div id="consejoHoy"></div>
+    <div style="height:12px"></div>
+    <button class="btn peq" id="btnIntento">Lo intento hoy</button>
+    <button class="btn peq sec" id="btnVerCal" style="margin-top:8px">Ver el mes completo</button>
+  </div>
+
+  <button class="btn sec" id="btnCopiar">Copiar resumen del día</button>
+  <div style="height:8px"></div>
+</section>
+
+<!-- ══════════ COMIDAS ══════════ -->
+<section class="vista" id="v-comidas">
+  <div class="card">
+    <div class="card-t"><h2>Registrar una comida</h2></div>
+
+    <label class="lb">Atajos: toca un platillo y se llena solo</label>
+    <div class="chips" id="chipsRapidos"></div>
+
+    <label class="lb">¿Cuál comida es?</label>
+    <div class="chips" id="chipsTipo"></div>
+
+    <label class="lb">¿Qué comiste?</label>
+    <input class="inp" id="inNombre" placeholder="Ej. Tacos de frijol con nopales" maxlength="80">
+    <p class="mini-nota">Solo el nombre del platillo. No anotes aquí datos de salud: padecimientos, medicamentos, alergias ni medidas corporales.</p>
+
+    <label class="lb">¿Qué grupos incluyó? (toca los que apliquen)</label>
+    <div class="chips" id="chipsGrupos"></div>
+
+    <label class="lb">¿Incluyó productos con sellos de advertencia?</label>
+    <div class="chips" id="chipsSellos">
+      <button class="chip" data-sello="0" aria-pressed="true">No / no apliqué</button>
+      <button class="chip" data-sello="1" aria-pressed="false">Sí, uno o más</button>
+    </div>
+
+    <div style="height:16px"></div>
+    <button class="btn" id="btnGuardar">Guardar comida</button>
+    <p class="mini-nota">Registrar sin juzgarte es la parte que sirve. No hay alimentos prohibidos aquí: solo información para que decidas con calma.</p>
+  </div>
+
+  <div class="card">
+    <div class="card-t"><h2>Comidas de hoy</h2><span class="sub" id="nComidas">0</span></div>
+    <div id="listaComidas"></div>
+  </div>
+  <div style="height:8px"></div>
+</section>
+
+<!-- ══════════ AVANCE ══════════ -->
+<section class="vista" id="v-avance">
+  <div class="card">
+    <div class="card-t"><h2>Últimos 7 días</h2><span class="sub">Grupos base cubiertos</span></div>
+    <div class="semana" id="semana"></div>
+    <p class="mini-nota">Cada barra cuenta cuántos de los cuatro grupos base (verduras, frutas, leguminosas, cereales integrales) alcanzaron el mínimo de la guía ese día.</p>
+  </div>
+
+  <div class="card">
+    <div class="card-t"><h2>Resumen de la semana</h2></div>
+    <div id="resumenSem"></div>
+  </div>
+
+  <div class="card">
+    <div class="card-t"><h2>Qué no registra esta app</h2><span class="sub">Por diseño</span></div>
+    <p class="legal-p">Esta app es solo de apoyo, organización y registro de hábitos. <b>No te pide ni guarda datos de salud</b>, que la ley mexicana clasifica como datos sensibles:</p>
+    <ul class="lista">
+      <li>Peso, talla, medidas corporales, índice de masa corporal ni porcentaje de grasa.</li>
+      <li>Padecimientos, diagnósticos, síntomas, alergias o intolerancias.</li>
+      <li>Medicamentos, tratamientos, consultas ni resultados de laboratorio.</li>
+      <li>Presión arterial, glucosa, frecuencia cardiaca ni ningún otro signo vital.</li>
+      <li>Nada que venga de sensores del teléfono, de otras apps o de Salud conectada.</li>
+    </ul>
+    <p class="legal-p" style="margin-top:10px">Lo único que se registra es lo que tú anotas de tus hábitos: grupos de alimentos, vasos de agua, minutos de movimiento, tu lista de compras y tu menú. Si llevas un control de peso o de alguna condición, hazlo con tu médico o nutriólogo, no aquí.</p>
+    <div class="aviso" style="margin-top:12px">
+      Al escribir el nombre de una comida, <b>no anotes información de salud</b> (padecimientos, medicamentos, medidas). El campo es para el platillo, nada más.
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-t"><h2>Logros</h2><span class="sub" id="nLogros">0</span></div>
+    <div id="listaLogros"></div>
+  </div>
+  <div style="height:8px"></div>
+</section>
+
+<!-- ══════════ CONSEJOS ══════════ -->
+<section class="vista" id="v-consejos">
+  <div class="aviso" style="margin-bottom:12px">
+    Los 31 consejos vienen de documentos oficiales y verificables, citados uno por uno. Son <b>recomendaciones generales de población</b>, no indicaciones personales.
+  </div>
+
+  <div class="card">
+    <div class="card-t"><h2>Calendario del mes</h2><span class="sub" id="calMes">—</span></div>
+    <div class="cal" id="cal"></div>
+    <div class="cal-leg">
+      <span>◆ hoy</span><span>● leído</span><span>✓ lo intenté</span>
+    </div>
+    <p class="mini-nota">Un consejo distinto para cada día del mes. Toca cualquier día para leerlo.</p>
+  </div>
+
+  <div class="sec-t">Cómo armar el plato</div>
+  <div class="card">
+    <div class="card-t"><h2>Plato del Bien Comer</h2><span class="sub">Actualización 2023</span></div>
+    <div class="plato-fila">
+      <svg width="104" height="104" viewBox="0 0 42 42" id="svgRef"></svg>
+      <div class="leyenda" id="leyRef"></div>
+    </div>
+    <span class="fuente">Fuente: Secretaría de Salud, Plato del Bien Comer (actualización 2023), con base en la NOM-043-SSA2-2012 · gob.mx/salud/documentos/plato-del-bien-comer</span>
+  </div>
+
+  <div class="sec-t">Los 31 consejos</div>
+  <div id="listaConsejos"></div>
+
+  <div class="sec-t">Qué beber</div>
+  <div class="card">
+    <div class="card-t"><h2>Jarra del Buen Beber</h2><span class="sub">6 niveles</span></div>
+    <div id="jarra"></div>
+    <span class="fuente">Fuente: Secretaría de Salud, Jarra del Buen Beber / Recomendaciones sobre el consumo de bebidas para la población mexicana.</span>
+  </div>
+
+  <div class="sec-t">Leer etiquetas</div>
+  <div class="card">
+    <div class="card-t"><h2>Sellos de advertencia</h2><span class="sub">NOM-051</span></div>
+    <p style="font-size:13.5px;color:var(--tinta-2);margin-bottom:10px">La norma mexicana de etiquetado frontal usa cinco sellos octagonales, en este orden, cuando el producto rebasa los límites de nutrimentos críticos:</p>
+    <div>
+      <span class="sello-ej">EXCESO<br>CALORÍAS</span>
+      <span class="sello-ej">EXCESO<br>AZÚCARES</span>
+      <span class="sello-ej">EXCESO<br>GRASAS SAT.</span>
+      <span class="sello-ej">EXCESO<br>GRASAS TRANS</span>
+      <span class="sello-ej">EXCESO<br>SODIO</span>
+    </div>
+    <p style="font-size:13.5px;color:var(--tinta-2);margin-top:11px">Además lleva dos leyendas precautorias: <b>contiene cafeína, evitar en niños</b> y <b>contiene edulcorantes, no recomendable en niños</b>. La guía alimentaria oficial sugiere elegir productos sin sellos o con el menor número posible.</p>
+    <span class="fuente">Fuente: NOM-051-SCFI/SSA1-2010 (modificación publicada en el DOF el 27 de marzo de 2020) y Guías Alimentarias Saludables y Sostenibles, recomendación 6.</span>
+  </div>
+
+  <div class="sec-t">Las 10 recomendaciones oficiales</div>
+  <div class="card">
+    <div id="lista10"></div>
+    <span class="fuente">Fuente: Guías Alimentarias Saludables y Sostenibles para la población mexicana — Secretaría de Salud e Instituto Nacional de Salud Pública. Aviso publicado en el Diario Oficial de la Federación: dof.gob.mx/2025/SS/GUIASALIMENTARIAS2025.pdf</span>
+  </div>
+  <div style="height:8px"></div>
+</section>
+
+<!-- ══════════ PRESUPUESTO ══════════ -->
+<section class="vista" id="v-dinero">
+  <div class="card">
+    <div class="card-t"><h2>Mi presupuesto</h2><span class="sub" id="periodoLb">semanal</span></div>
+    <div class="inp-fila">
+      <input class="inp" id="inPresup" type="number" inputmode="decimal" min="0" step="10" placeholder="¿Cuánto puedes destinar?">
+      <select class="inp" id="selPeriodo" style="width:auto">
+        <option value="semanal">Semanal</option>
+        <option value="quincenal">Quincenal</option>
+        <option value="mensual">Mensual</option>
+      </select>
+    </div>
+    <div style="height:10px"></div>
+    <button class="btn peq" id="btnPresup">Guardar presupuesto</button>
+
+    <div style="margin-top:16px">
+      <div class="gasto-top">
+        <div class="num-grande">$<span id="gastoTotal">0</span></div>
+        <div class="pesos">de $<span id="presupTxt">0</span></div>
+        <div class="pesos" style="margin-left:auto" id="restaTxt"></div>
+      </div>
+      <div class="barra" style="height:9px;margin-top:9px"><i id="barraGasto" style="width:0%"></i></div>
+    </div>
+    <div class="repart" id="repart"></div>
+  </div>
+
+  <div class="card">
+    <div class="card-t"><h2>Lista de compras</h2><span class="sub" id="nItems">0</span></div>
+    <label class="lb">Producto</label>
+    <input class="inp" id="inItem" placeholder="Ej. Frijol negro 1 kg" maxlength="60">
+    <label class="lb">Grupo</label>
+    <div class="chips" id="chipsGrupoItem"></div>
+    <div class="inp-fila" style="margin-top:12px">
+      <input class="inp" id="inCant" type="number" inputmode="decimal" min="0" step="0.5" value="1" placeholder="Cant.">
+      <input class="inp" id="inPrecio" type="number" inputmode="decimal" min="0" step="0.5" placeholder="Precio unitario $">
+    </div>
+    <div style="height:12px"></div>
+    <button class="btn" id="btnItem">Agregar a la lista</button>
+    <p class="mini-nota">Los precios los capturas tú, con lo que de verdad ves en tu tienda o mercado. La app no inventa precios ni promedios.</p>
+    <div style="margin-top:14px" id="listaItems"></div>
+    <div style="height:10px"></div>
+    <button class="btn sec peq" id="btnLimpiarLista">Vaciar lista</button>
+  </div>
+
+  <div class="card">
+    <div class="card-t"><h2>Ideas para estirar el gasto</h2><span class="sub">Organización</span></div>
+    <ul class="lista">
+      <li><b>Leguminosas de base.</b> La guía oficial recomienda frijol, lenteja, haba o garbanzo a diario; en grano son de los productos que más rinden por peso.</li>
+      <li><b>Verdura de temporada y local.</b> La recomendación 2 pide priorizarla; de paso suele ser la más barata del mercado.</li>
+      <li><b>Menos carne de res y nada de procesados.</b> La recomendación 5 sugiere bajarla a dos veces por semana o menos, sustituyendo con leguminosas, huevo, pollo o pescado en cantidades moderadas.</li>
+      <li><b>Cocina en tandas.</b> Una olla de frijol, un arroz integral y verdura cocida rinden para varias comidas de la semana.</li>
+      <li><b>Compra con lista.</b> Captura tus precios reales arriba y así ves el total antes de ir a la tienda, no después.</li>
+      <li><b>Agua de la llave hervida o filtrada.</b> Sustituir refresco por agua natural es la recomendación 7 y es también el ahorro más directo.</li>
+    </ul>
+    <p class="mini-nota">Las ideas de ahorro son sugerencias de organización doméstica. Las recomendaciones de alimentación citadas provienen de las Guías Alimentarias oficiales.</p>
+  </div>
+
+  <div class="card">
+    <div class="card-t"><h2>Menú de la semana</h2><button class="chip mini" id="btnIdeas">Darme ideas</button></div>
+    <div id="menuSem"></div>
+    <p class="mini-nota">Las ideas son combinaciones armadas con la estructura del Plato del Bien Comer (mitad verduras y frutas, más leguminosas y cereal integral). Son sugerencias de armado, no una dieta prescrita.</p>
+  </div>
+  <div style="height:8px"></div>
+</section>
+
+<!-- ══════════ LEGAL ══════════ -->
+<section class="vista" id="v-legal">
+  <div class="card">
+    <div class="card-t"><h2>Qué es y qué no es esta app</h2></div>
+    <p class="legal-p"><b>Es</b> una herramienta auxiliar de organización y educación: te ayuda a registrar lo que comes, tu agua, tu movimiento y tu gasto en alimentos, y te muestra recomendaciones generales tomadas de documentos oficiales.</p>
+    <p class="legal-p"><b>No es</b> un dispositivo médico ni un servicio de salud. No diagnostica, no evalúa tu estado de salud, no prescribe dietas ni tratamientos, no calcula calorías ni déficits, y no sustituye la consulta con un médico, nutriólogo u otro profesional de la salud.</p>
+    <p class="legal-p"><b>No pide ni guarda datos de salud.</b> No registra peso, talla ni medidas corporales, padecimientos, diagnósticos, síntomas, alergias, medicamentos, tratamientos ni resultados de estudios, y no accede a sensores del teléfono ni a datos de otras apps. Solo guarda los hábitos que tú anotas, y solo en tu dispositivo.</p>
+    <p class="legal-p">Ningún alimento se presenta aquí con cualidades preventivas, terapéuticas, rehabilitatorias o curativas. El Reglamento de la Ley General de Salud en Materia de Publicidad (artículo 6) prohíbe atribuir a los productos cualidades que no les corresponden, y la Ley General de Salud (artículo 307) prohíbe inducir hábitos de alimentación nocivos o atribuir a los alimentos industrializados un valor nutritivo superior o distinto al real.</p>
+    <p class="legal-p"><b>Los recordatorios son dentro de la app.</b> No envía notificaciones al teléfono ni avisos fuera de esta pantalla: el aviso de metas pendientes aparece cuando abres la pestaña Hoy.</p>
+    <p class="legal-p"><b>Consulta a un profesional</b> antes de cambiar tu alimentación si tienes alguna condición de salud o tratamiento, si estás embarazada o en lactancia, si tomas medicamentos, o si notas cualquier síntoma. Las recomendaciones de población no equivalen a una indicación personal.</p>
+  </div>
+
+  <div class="card">
+    <div class="card-t"><h2>Aviso de privacidad</h2><span class="sub">Integral · LFPDPPP</span></div>
+
+    <p class="legal-p"><b>1. Identidad y domicilio del responsable.</b> <span style="background:var(--maiz-claro);padding:1px 5px;border-radius:4px">[Nombre completo o razón social del responsable]</span>, con domicilio en <span style="background:var(--maiz-claro);padding:1px 5px;border-radius:4px">[calle, número, colonia, municipio, estado, C.P.]</span> y correo de contacto <span style="background:var(--maiz-claro);padding:1px 5px;border-radius:4px">[correo]</span>. Estos tres datos deben llenarse antes de publicar o compartir la app con otras personas.</p>
+
+    <p class="legal-p"><b>2. Datos personales que se tratan.</b> La app funciona con los datos que tú escribes y que se quedan en tu propio dispositivo: un nombre o apodo que tú eliges, el objetivo que seleccionas al entrar, los grupos de alimentos y el nombre de los platillos que registras, los vasos de agua, los minutos de movimiento, tu presupuesto de alimentos con su lista de compras, tu menú de la semana y qué consejos leíste.</p>
+    <p class="legal-p"><b>No se tratan datos personales sensibles.</b> La app no solicita ni almacena datos de salud —padecimientos, diagnósticos, síntomas, medicamentos, tratamientos, alergias, resultados de laboratorio, peso, talla ni medidas corporales—, ni datos de origen racial o étnico, creencias religiosas, filosóficas o políticas, afiliación sindical, vida sexual o información genética o biométrica. Tampoco pide identificaciones oficiales, CURP, RFC, domicilio, teléfono, correo, datos bancarios ni medios de pago.</p>
+    <p class="legal-p">La app no accede a sensores corporales, a Salud conectada ni a datos de otras aplicaciones, y no pide permisos del sistema.</p>
+
+    <p class="legal-p"><b>3. Finalidades del tratamiento.</b> Finalidades necesarias, sin las cuales la herramienta no funciona: mostrarte tu propio registro de hábitos del día y de la semana, calcular tu avance contra las metas, guardarte tu presupuesto y tu menú, y recordarte lo que falta del día. <b>No existen finalidades adicionales:</b> no hay publicidad, ni mercadotecnia, ni perfilamiento, ni elaboración de estadísticas, ni cesión o venta de datos a terceros. Por eso no se recaba consentimiento para finalidades secundarias: no hay ninguna.</p>
+
+    <p class="legal-p"><b>4. Opciones y medios para limitar el uso o divulgación.</b> Todo el contenido se guarda solo en el almacenamiento local de este navegador o dispositivo. No se transmite fuera del dispositivo, no se sincroniza, no viaja a ningún servidor, no se comparte con nadie y quien hizo la app no lo puede ver. Puedes dejar vacío cualquier campo —incluido tu nombre—, usar la app sin registrar nada, o borrarlo todo con el botón del final de esta sección. Al borrar los datos del navegador también se borran tus registros.</p>
+
+    <p class="legal-p"><b>5. Medios para ejercer los derechos ARCO.</b> Como los datos nunca salen de tu dispositivo, tú los ejerces directamente aquí: <b>acceso</b>, viendo tus registros en las pestañas Hoy y Avance; <b>rectificación</b>, editando o borrando cualquier comida, cantidad, producto o línea del menú; <b>cancelación</b>, con el botón "Borrar todos mis datos"; <b>oposición</b>, dejando de usar la app o desinstalándola, lo que elimina el almacenamiento local. Si en alguna versión futura se llegaran a recabar datos fuera del dispositivo, podrás ejercer estos derechos y revocar tu consentimiento escribiendo al correo de contacto del punto 1, y la respuesta se dará en los plazos que marca la ley.</p>
+
+    <p class="legal-p"><b>6. Cambios al aviso.</b> Cualquier modificación a este aviso se publicará en esta misma sección, con la fecha de la última actualización. Si una versión futura usara los datos para una finalidad distinta a las aquí previstas, se te pedirá de nuevo tu consentimiento antes de hacerlo.</p>
+
+    <p class="legal-p">La autoridad en materia de protección de datos personales en posesión de particulares es la Secretaría Anticorrupción y Buen Gobierno, conforme a la Ley Federal de Protección de Datos Personales en Posesión de los Particulares publicada en el Diario Oficial de la Federación el 20 de marzo de 2025 y vigente desde el 21 de marzo de 2025.</p>
+
+    <p class="mini-nota">Última actualización: 15 de noviembre de 2026. Este texto sigue los elementos mínimos del artículo 15 de la ley vigente; es un punto de partida informativo y no asesoría legal. Antes de publicar la app conviene revisarlo con un abogado.</p>
+
+  </div>
+
+  <div class="card">
+    <div class="card-t"><h2>Seguridad de los datos</h2><span class="sub">Qué está hecho</span></div>
+    <ul class="lista">
+      <li><b>No habla con nadie más que consigo misma.</b> Lo único que la app puede pedir son sus propios archivos, en su propia dirección, para abrir sin internet. No manda ni recibe nada de ningún servidor ajeno. Está bloqueado a nivel técnico con una política de seguridad de contenido (<i>connect-src 'self'</i>), no solo por buena intención: aunque el código intentara mandar tus datos a otro lado, el navegador lo impediría.</li>
+      <li><b>Lo que guarda para funcionar sin internet</b> son solo las pantallas de la app: nunca tus registros, que se quedan aparte, en el almacenamiento del navegador.</li>
+      <li><b>Sin cuentas ni contraseñas.</b> No hay registro, ni correo, ni inicio de sesión, así que no hay nada que te puedan robar de un servidor que no existe.</li>
+      <li><b>Sin rastreadores.</b> No hay analítica, publicidad, cookies de terceros, píxeles ni librerías externas. La única cosa que se descarga de fuera es la tipografía.</li>
+      <li><b>Sin permisos del sistema.</b> No pide cámara, micrófono, ubicación, contactos, archivos, notificaciones, sensores corporales ni Salud conectada.</li>
+      <li><b>Almacenamiento local.</b> Todo vive en el almacenamiento del navegador de este dispositivo, separado de cualquier otro sitio, y solo esta app lo puede leer.</li>
+    </ul>
+
+    <div class="card-t" style="margin-top:18px"><h2>Lo que esta app no puede proteger</h2><span class="sub">Honestidad</span></div>
+    <ul class="lista">
+      <li>El almacenamiento local <b>no va cifrado</b>. Quien tome tu dispositivo desbloqueado puede abrir la app y leer tus registros. Usa PIN, patrón o huella en el teléfono: ese es el candado real.</li>
+      <li>En un dispositivo o navegador compartido, cualquiera que lo use ve los mismos datos. Para eso conviene una ventana privada o no registrar nada ahí.</li>
+      <li>Si limpias los datos del navegador, desinstalas, o usas modo incógnito, <b>tus registros se borran y no hay respaldo</b>. Nadie los puede recuperar, tampoco quien hizo la app.</li>
+      <li>Los datos no se sincronizan: lo que anotes en el teléfono no aparece en la tablet ni al revés.</li>
+    </ul>
+
+    <div class="card-t" style="margin-top:18px"><h2>Tus controles</h2><span class="sub">Derechos ARCO</span></div>
+    <p class="legal-p">Acceso y portabilidad: copia todo lo que tiene la app en texto plano. Cancelación: borra por partes o todo.</p>
+    <button class="btn sec peq" id="btnCopiarTodo">Copiar todos mis datos</button>
+    <div style="height:8px"></div>
+    <button class="btn sec peq" id="btnBorrarRegistros" style="color:var(--jamaica)">Borrar solo mis registros de hábitos</button>
+    <div style="height:8px"></div>
+    <button class="btn sec peq" id="btnBorrarDinero" style="color:var(--jamaica)">Borrar solo presupuesto y menú</button>
+    <div style="height:8px"></div>
+    <button class="btn sec peq" id="btnBorrar" style="color:var(--jamaica)">Borrar todos mis datos</button>
+  </div>
+
+  <div class="card">
+    <div class="card-t"><h2>Si algún día la publicas</h2><span class="sub">Checklist</span></div>
+    <p class="legal-p"><b>En Google Play.</b> Tres cosas son obligatorias para una app con contenido de salud:</p>
+    <ul class="lista">
+      <li><b>Formulario de declaración de apps de salud</b>, en Contenido de la app. Lo tienen que llenar todos los desarrolladores con apps publicadas, incluso los que no ofrecen ninguna función de salud. Pregunta los fines de la app, los beneficios que declaras y el fundamento de esa declaración.</li>
+      <li><b>Política de privacidad</b>: el enlace va en el campo de Play Console y además dentro de la propia app. Esta sección cumple la parte de dentro de la app; falta publicarla también en una página con URL pública.</li>
+      <li><b>Deslindes en los metadatos</b> de la ficha de la tienda, no solo aquí: que no está pensada para uso médico, que no es un dispositivo médico y que es solo para fines generales de bienestar.</li>
+    </ul>
+    <p class="legal-p">En el formulario de <b>Seguridad de los datos</b> se puede declarar que no se recopilan ni se comparten datos del usuario: Google indica que el acceso a datos no se declara como recopilación cuando ocurre únicamente en el dispositivo y los datos nunca se transmiten fuera de él. Es exactamente el caso de esta app. Y la política de salud de Play pide no solicitar permisos de salud ni recopilar datos de salud que no sean esenciales: esta app no pide ninguno.</p>
+    <p class="legal-p"><b>En México.</b> El aviso de privacidad de arriba sigue el artículo 15 de la LFPDPPP vigente desde el 21 de marzo de 2025. Cuando los datos se obtienen por medios electrónicos, la ley pide mostrar la <b>modalidad simplificada</b> —responsable, datos, finalidades y opciones para limitar el uso— indicando dónde consultar el aviso integral; eso es lo que aparece en la pantalla de bienvenida. Si una versión futura recabara datos fuera del dispositivo, habría que pedir consentimiento de nuevo y habilitar un canal de atención a derechos ARCO.</p>
+    <p class="legal-p">Se mantienen además los <b>deslindes de no diagnóstico</b> y la regla de no atribuir propiedades preventivas, terapéuticas ni curativas a ningún alimento, por la Ley General de Salud y su Reglamento en Materia de Publicidad. Si algún día cobras o pones publicidad, se suman la Ley Federal de Protección al Consumidor y obligaciones fiscales.</p>
+    <p class="mini-nota">Esto es un resumen informativo de normas y políticas públicas, no asesoría legal. Para distribuir la app conviene revisarlo con un abogado.</p>
+  </div>
+
+  <div class="card">
+    <div class="card-t"><h2>Fuentes</h2></div>
+    <ul class="lista">
+      <li>Secretaría de Salud e Instituto Nacional de Salud Pública, <b>Guías Alimentarias Saludables y Sostenibles para la población mexicana</b> — aviso en el DOF: <a href="https://dof.gob.mx/2025/SS/GUIASALIMENTARIAS2025.pdf">dof.gob.mx/2025/SS/GUIASALIMENTARIAS2025.pdf</a></li>
+      <li>Secretaría de Salud, <b>Plato del Bien Comer</b> (actualización 2023) y <b>NOM-043-SSA2-2012</b>: <a href="https://www.gob.mx/salud/documentos/plato-del-bien-comer">gob.mx/salud/documentos/plato-del-bien-comer</a></li>
+      <li>Organización Mundial de la Salud, <b>Alimentación sana</b>: <a href="https://www.who.int/es/news-room/fact-sheets/detail/healthy-diet">who.int/es/news-room/fact-sheets/detail/healthy-diet</a></li>
+      <li>Organización Mundial de la Salud, <b>Reducción del consumo de sodio</b>: <a href="https://www.who.int/es/news-room/fact-sheets/detail/sodium-reduction">who.int/es/news-room/fact-sheets/detail/sodium-reduction</a></li>
+      <li>Organización Mundial de la Salud, <b>Directrices: Ingesta de potasio en adultos y niños</b> (2013).</li>
+      <li>Organización Mundial de la Salud, <b>Directrices sobre actividad física y hábitos sedentarios</b> (2020).</li>
+      <li>Organización Mundial de la Salud, <b>Manual sobre las cinco claves para la inocuidad de los alimentos</b>.</li>
+      <li><b>NOM-051-SCFI/SSA1-2010</b>, etiquetado frontal (modificación DOF 27/03/2020).</li>
+      <li><b>Ley General de Salud</b>, artículo 307, y <b>Reglamento de la LGS en Materia de Publicidad</b>, artículo 6.</li>
+      <li><b>Ley Federal de Protección de Datos Personales en Posesión de los Particulares</b> (vigente desde el 21 de marzo de 2025): <a href="https://www.diputados.gob.mx/LeyesBiblio/pdf_mov/Ley_Federal_de_Proteccion_de_Datos_Personales-Posesion-Particulares.pdf">diputados.gob.mx</a></li>
+    </ul>
+  </div>
+  <div style="height:8px"></div>
+</section>
+
+</main>
+
+<nav>
+  <div class="nav-in">
+    <button class="nav-b" data-v="hoy" aria-current="true"><i>◉</i>Hoy<span class="punto" id="puntoHoy"></span></button>
+    <button class="nav-b" data-v="comidas"><i>🍽</i>Comidas</button>
+    <button class="nav-b" data-v="avance"><i>📈</i>Avance</button>
+    <button class="nav-b" data-v="consejos"><i>💡</i>Consejos</button>
+    <button class="nav-b" data-v="dinero"><i>💰</i>Dinero</button>
+  </div>
+</nav>
+
+<div class="modal" id="modalBienvenida">
+  <div class="modal-box">
+    <h2>Antes de empezar</h2>
+    <p class="legal-p">Esta app es una <b>herramienta auxiliar</b> para organizar tus comidas, tu agua, tu movimiento y tu gasto en alimentos, y para acercarte recomendaciones generales de fuentes oficiales.</p>
+    <p class="legal-p"><b>No diagnostica, no prescribe dietas ni sustituye la consulta con un profesional de la salud.</b> No cuenta calorías ni prohíbe alimentos: la idea es que sumes, no que te restrinjas.</p>
+    <div class="aviso">
+      <b>Aviso de privacidad (versión simplificada)</b><br>
+      Responsable: <span style="background:var(--card);padding:1px 5px;border-radius:4px">[nombre y domicilio del responsable]</span>.
+      Datos que se tratan: el nombre o apodo que elijas y los registros de hábitos que tú escribas (alimentos, agua, movimiento, presupuesto y menú).
+      <b>No se solicitan ni se guardan datos de salud ni ningún otro dato sensible.</b>
+      Finalidad: únicamente mostrarte tu propio registro y tu avance. No hay publicidad ni uso de tus datos para otra cosa.
+      Todo se guarda solo en este dispositivo y no se envía a ningún servidor; puedes dejar los campos vacíos o borrar todo cuando quieras.
+      Puedes consultar el aviso de privacidad integral en el botón <b>ⓘ</b> de la esquina superior derecha, en cualquier momento.
+    </div>
+    <label class="lb">¿Cómo te llamo? (opcional)</label>
+    <input class="inp" id="inNombreUser" placeholder="Tu nombre o un apodo" maxlength="24" autocomplete="off" autocapitalize="words" spellcheck="false">
+    <label class="lb">¿Qué buscas, sobre todo?</label>
+    <div class="chips" id="chipsMeta">
+      <button class="chip" data-meta="Comer más natural" aria-pressed="true">Comer más natural</button>
+      <button class="chip" data-meta="Cuidar mi peso">Cuidar mi peso</button>
+      <button class="chip" data-meta="Tener más energía">Tener más energía</button>
+      <button class="chip" data-meta="Gastar mejor">Gastar mejor</button>
+    </div>
+    <div style="height:18px"></div>
+    <button class="btn" id="btnEmpezar">Entendido, empezar</button>
+  </div>
+</div>
+
+<div class="modal" id="modalConsejo">
+  <div class="modal-box">
+    <h2 id="mcTitulo">Consejo</h2>
+    <div id="mcCuerpo"></div>
+    <div style="height:16px"></div>
+    <button class="btn peq" id="mcIntento">Lo quiero intentar</button>
+    <button class="cerrar" id="mcCerrar">Cerrar</button>
+  </div>
+</div>
+
+<div class="modal" id="modalConfirm">
+  <div class="modal-box">
+    <h2 id="confTitulo">¿Seguro?</h2>
+    <p class="legal-p" id="confTexto"></p>
+    <div style="height:8px"></div>
+    <button class="btn" id="confSi" style="background:var(--jamaica)">Sí, continuar</button>
+    <button class="cerrar" id="confNo">Cancelar</button>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+(function(){
+"use strict";
+
+/* ═══════════════════════════════════════════════
+   FUENTES (toda cifra de salud tiene la suya)
+   ═══════════════════════════════════════════════ */
+var F_GUIAS  = "Fuente: Guías Alimentarias Saludables y Sostenibles para la población mexicana, Secretaría de Salud e INSP (aviso en el DOF).";
+var F_OMS    = "Fuente: Organización Mundial de la Salud, hoja informativa «Alimentación sana».";
+var F_OMS_NA = "Fuente: Organización Mundial de la Salud, hoja informativa «Reducción del consumo de sodio».";
+var F_OMS_K  = "Fuente: Organización Mundial de la Salud, «Directrices: Ingesta de potasio en adultos y niños» (2013).";
+var F_OMS_AF = "Fuente: Organización Mundial de la Salud, «Directrices sobre actividad física y hábitos sedentarios» (2020).";
+var F_OMS_IN = "Fuente: Organización Mundial de la Salud, «Manual sobre las cinco claves para la inocuidad de los alimentos».";
+var F_PLATO  = "Fuente: Secretaría de Salud, Plato del Bien Comer (actualización 2023), con base en la NOM-043-SSA2-2012.";
+var F_NOM43  = "Fuente: NOM-043-SSA2-2012, Servicios básicos de salud. Promoción y educación para la salud en materia alimentaria.";
+var F_NOM51  = "Fuente: NOM-051-SCFI/SSA1-2010, etiquetado frontal (modificación publicada en el DOF el 27 de marzo de 2020).";
+var F_JARRA  = "Fuente: Secretaría de Salud, Jarra del Buen Beber / Recomendaciones sobre el consumo de bebidas para la población mexicana.";
+
+/* ═══════════ 31 CONSEJOS, UNO POR DÍA DEL MES ═══════════ */
+var CONSEJOS = [
+ {t:"Verduras y frutas en todas las comidas",
+  d:"La segunda recomendación oficial pide incluir verduras y frutas frescas en todas las comidas, de preferencia de temporada y de producción local. La cantidad planteada va de 4 a 5 porciones de verduras y de 2 a 3 de fruta al día, según edad y sexo.",
+  datos:["4–5 verduras","2–3 frutas"], f:F_GUIAS},
+ {t:"La mitad del plato",
+  d:"El Plato del Bien Comer actualizado reparte el plato en 50% verduras y frutas de temporada, 22% granos y cereales, 15% leguminosas, 8% alimentos de origen animal y 5% aceites y grasas saludables.",
+  datos:["50% verduras y frutas","15% leguminosas"], f:F_PLATO},
+ {t:"Al menos 400 gramos al día",
+  d:"La OMS recomienda al menos 400 g diarios de frutas y verduras en personas mayores de 10 años. Para niñas y niños de 6 a 9 años son 350 g, y de 2 a 5 años, al menos 250 g.",
+  datos:["≥400 g al día"], f:F_OMS},
+ {t:"Frijol, lenteja o haba todos los días",
+  d:"La tercera recomendación es consumir leguminosas a diario: frijoles, lentejas, habas o garbanzos. La cantidad planteada es de media a una taza al día, es decir una a dos porciones según edad y sexo.",
+  datos:["½ a 1 taza al día"], f:F_GUIAS},
+ {t:"Que la mitad del cereal sea integral",
+  d:"La guía propone de 5 a 12 porciones diarias de cereales y tubérculos según edad y sexo —tortilla de maíz, avena, arroz, papa— y que al menos la mitad de los cereales sean integrales o de grano entero.",
+  datos:["5–12 porciones","mitad integral"], f:F_GUIAS},
+ {t:"Agua natural, la bebida principal",
+  d:"La séptima recomendación es tomar agua natural a lo largo del día y con todas las comidas, en lugar de bebidas azucaradas. La Jarra del Buen Beber coloca el agua en el primer nivel, con al menos ocho vasos al día.",
+  datos:["8+ vasos"], f:F_JARRA},
+ {t:"El refresco no tiene nivel seguro",
+  d:"En la Jarra del Buen Beber, los refrescos y las bebidas con azúcar añadida —incluidos jugos industrializados, aguas de sabor y café azucarado— están en el sexto nivel, con la indicación de eliminarlos de la dieta.",
+  datos:["nivel 6: eliminar"], f:F_JARRA},
+ {t:"Cuánta azúcar es demasiada",
+  d:"La OMS recomienda que los azúcares libres no superen el 10% de la energía diaria —unos 50 g en una dieta de 2000 kcal— y señala beneficios adicionales si bajan al 5% o menos, alrededor de 25 g.",
+  datos:["<10% ≈ 50 g","ideal <5% ≈ 25 g"], f:F_OMS},
+ {t:"El jugo también cuenta",
+  d:"Según la OMS, la mayoría de los jugos de fruta —incluso los que no llevan azúcares añadidos— contienen cantidades elevadas de azúcares libres, por lo que su consumo debe limitarse. La fruta entera es la mejor opción.",
+  datos:["limitar jugos"], f:F_OMS},
+ {t:"Menos de una cucharadita de sal",
+  d:"Para adultos, la OMS recomienda menos de 2000 mg de sodio al día, equivalente a menos de 5 g de sal: poco menos de una cucharadita. El promedio mundial en 2021 fue de 4278 mg de sodio, más del doble.",
+  datos:["<5 g de sal","<2000 mg de sodio"], f:F_OMS_NA},
+ {t:"Haz la cuenta del sodio",
+  d:"Un gramo de sal equivale a 400 mg de sodio, y 5 g de sal son 2000 mg. Con esa regla puedes leer el sodio de cualquier etiqueta y saber cuánto de tu día se lleva un solo producto.",
+  datos:["1 g sal = 400 mg sodio"], f:F_OMS_NA},
+ {t:"Sabor sin salero",
+  d:"La OMS sugiere cocinar con poca o nada de sal añadida, retirar el salero de la mesa, usar hierbas y especias para dar sabor y limitar salsas, aderezos, productos instantáneos y alimentos procesados. Si usas sal, que sea yodada.",
+  datos:["quita el salero"], f:F_OMS_NA},
+ {t:"El potasio del otro lado de la balanza",
+  d:"La OMS sugiere que los adultos consuman al menos 3510 mg de potasio al día a partir de los alimentos, para ayudar a reducir la tensión arterial. Leguminosas, frutos secos, verduras de hoja verde y frutas son fuentes del mineral.",
+  datos:["≥3510 mg al día"], f:F_OMS_K},
+ {t:"Grasa total: hasta 30%",
+  d:"En adultos, la OMS sitúa la grasa total en 30% o menos de la energía diaria. No se trata de eliminarla: se trata de medirla y de elegir mejores fuentes.",
+  datos:["≤30% de la energía"], f:F_OMS},
+ {t:"Grasas saturadas: hasta 10%",
+  d:"La OMS recomienda que las grasas saturadas no pasen del 10% de la energía total del día.",
+  datos:["≤10% de la energía"], f:F_OMS},
+ {t:"Grasas trans: hasta 1%",
+  d:"La recomendación de la OMS para las grasas trans es no más del 1% de la energía diaria, cualquiera que sea su origen. La NOM-051 pone sello de exceso cuando aportan 1% o más de la energía del producto.",
+  datos:["≤1% de la energía"], f:F_OMS},
+ {t:"25 gramos de fibra",
+  d:"La OMS recomienda al menos 25 g de fibra dietética al día en mayores de 10 años; 21 g para niños de 6 a 9 años y 15 g de 2 a 5 años. Verduras, frutas, leguminosas y cereales integrales son el camino.",
+  datos:["≥25 g de fibra"], f:F_OMS},
+ {t:"Carbohidratos sin refinar",
+  d:"Según la OMS, los carbohidratos no refinados deberían aportar entre el 45% y el 75% de la energía total, principalmente de cereales integrales, verduras, frutas y legumbres.",
+  datos:["45–75% de la energía"], f:F_OMS},
+ {t:"Menos res, nada de procesadas",
+  d:"La quinta recomendación pide comer menos carne de res y evitar las carnes procesadas. Para quien la come a diario, sugiere reducirla gradualmente hasta dos veces por semana o menos, y poner en su lugar leguminosas y cantidades moderadas de huevo, pollo o pescado.",
+  datos:["≤2 veces por semana"], f:F_GUIAS},
+ {t:"Elige productos sin sellos",
+  d:"La sexta recomendación es evitar los alimentos ultraprocesados —embutidos, frituras, galletas, pan dulce, cereales de caja, bebidas endulzadas— y elegir productos sin sellos de advertencia o con el menor número posible.",
+  datos:["cero sellos, mejor"], f:F_GUIAS},
+ {t:"Los cinco sellos y dos leyendas",
+  d:"El etiquetado frontal mexicano usa cinco sellos octagonales en este orden: exceso de calorías, de azúcares, de grasas saturadas, de grasas trans y de sodio. Además lleva dos leyendas precautorias por cafeína y por edulcorantes, no recomendables en niños.",
+  datos:["5 sellos","2 leyendas"], f:F_NOM51},
+ {t:"Cómo se gana un sello",
+  d:"La tabla de perfiles nutrimentales de la norma pone sello de exceso cuando el producto aporta 10% o más de su energía en azúcares libres, 10% o más en grasas saturadas, 1% o más en grasas trans, o cuando tiene 300 mg de sodio o más, o 1 mg de sodio por kilocaloría.",
+  datos:["azúcares ≥10%","sodio ≥300 mg"], f:F_NOM51},
+ {t:"Las seis características de la dieta correcta",
+  d:"La norma oficial define la dieta correcta como completa, equilibrada, inocua, suficiente, variada y adecuada. Completa es incluir alimentos de los tres grupos en cada comida; equilibrada es que los nutrimentos guarden proporción entre sí.",
+  datos:["6 características"], f:F_NOM43},
+ {t:"«Adecuada» significa tu vida real",
+  d:"Entre esas seis características, adecuada quiere decir que la alimentación se adapte a tus gustos, costumbres, tradiciones y recursos económicos. Un plan que no cabe en tu presupuesto o en tu cocina no es más saludable: es menos sostenible.",
+  datos:["a tus gustos y recursos"], f:F_NOM43},
+ {t:"De 150 a 300 minutos",
+  d:"Para adultos de 18 a 64 años, la recomendación es acumular de 150 a 300 minutos semanales de actividad física aeróbica moderada, o de 75 a 150 minutos de actividad vigorosa, o una combinación equivalente.",
+  datos:["150–300 min/semana"], f:F_OMS_AF},
+ {t:"Fuerza, dos días por semana",
+  d:"Además de la actividad aeróbica, la OMS recomienda hacer actividades de fortalecimiento muscular de intensidad moderada o mayor, trabajando todos los grandes grupos musculares, dos o más días a la semana.",
+  datos:["2+ días por semana"], f:F_OMS_AF},
+ {t:"Algo siempre es mejor que nada",
+  d:"La OMS señala que si no alcanzas las recomendaciones, hacer algo de actividad física ya resulta beneficioso, y sugiere empezar con dosis pequeñas para aumentar poco a poco la duración, la frecuencia y la intensidad.",
+  datos:["empieza pequeño"], f:F_OMS_AF},
+ {t:"Cambia tiempo sentado por movimiento",
+  d:"La novena recomendación oficial es hacer más actividad física y reducir el tiempo sentado o frente a pantallas. La OMS plantea sustituir el tiempo sedentario por actividad de cualquier intensidad, incluso leve.",
+  datos:["menos tiempo sentado"], f:F_OMS_AF},
+ {t:"Cinco claves para no enfermarte por la comida",
+  d:"La OMS resume la inocuidad en cinco claves: mantén la limpieza, separa alimentos crudos y cocinados, cocina completamente, mantén los alimentos a temperaturas seguras y usa agua y materias primas seguras. Lávate las manos con agua y jabón al menos 20 segundos.",
+  datos:["5 claves","20 segundos de lavado"], f:F_OMS_IN},
+ {t:"La zona de peligro de tu cocina",
+  d:"Entre 5 °C y 60 °C los microorganismos se multiplican rápido. La OMS recomienda no dejar alimentos cocinados más de dos horas a temperatura ambiente, refrigerarlos de preferencia por debajo de 5 °C, cocinar hasta 70 °C, no guardar sobras más de tres días y no recalentarlas más de una vez.",
+  datos:["5 °C a 60 °C","cocinar a 70 °C"], f:F_OMS_IN},
+ {t:"Comer acompañado también cuenta",
+  d:"La décima recomendación invita a disfrutar los alimentos en familia o con amigos cuando sea posible, participar todos en la planeación y la preparación de las comidas, y no desperdiciar alimentos. La octava, aparte, recomienda evitar el alcohol.",
+  datos:["planea y comparte"], f:F_GUIAS}
+];
+
+/* ═══════════ FRASES CORTAS ═══════════ */
+var FRASES = [
+ "Un paso hoy vale más que un plan perfecto mañana.",
+ "Sumar es más fácil que prohibir.",
+ "Lo que registras, lo entiendes.",
+ "Hoy cuenta, aunque sea poquito.",
+ "Nadie come perfecto. Tú come mejor.",
+ "Media taza de frijol también es un avance.",
+ "El agua es el cambio más barato que puedes hacer.",
+ "Tu plato, tu ritmo.",
+ "Un vaso más. Nada más.",
+ "Camina diez minutos: ya es ganancia.",
+ "La constancia le gana a la intensidad.",
+ "No empieces de cero: sigue desde donde vas.",
+ "Hoy no se trata de resistir, se trata de elegir.",
+ "Un día flojo no borra la semana.",
+ "Lo que se come con gusto, se sostiene.",
+ "Más verduras, menos reglas.",
+ "Hazlo fácil y lo vas a repetir.",
+ "La cocina de casa casi siempre gana.",
+ "Pequeño y seguido: así se construye.",
+ "Mañana te va a dar gusto haberlo hecho.",
+ "No necesitas un lunes para empezar.",
+ "Avanzar despacio sigue siendo avanzar.",
+ "Primero el agua, luego lo demás.",
+ "Tu meta no se cancela por un antojo.",
+ "Ya estás más cerca que ayer.",
+ "Tú decides el siguiente bocado.",
+ "Hoy puedes cerrar una meta más.",
+ "Lo que se mide, se mejora.",
+ "Cuídate hoy para no apurarte después.",
+ "Falta poco y tú ya sabes qué sigue."
+];
+var FRASES_LISTO = [
+ "Día completo. Así se ve cuidarte.",
+ "Cerraste todas tus metas. Eso no es suerte.",
+ "Hoy le cumpliste a tu cuerpo.",
+ "Completo. Mañana otra vez, sin presión.",
+ "Esto ya es un hábito, no un intento."
+];
+
+/* ═══════════ DATOS DE APOYO ═══════════ */
+var GRUPOS = [
+  {id:"verduras",   nom:"Verduras",              emoji:"🥦", min:4, color:"var(--verde)",   fondo:"var(--verde-claro)",   meta:"4 a 5 porciones", base:true},
+  {id:"frutas",     nom:"Frutas",                emoji:"🍎", min:2, color:"var(--jamaica)", fondo:"var(--jamaica-claro)", meta:"2 a 3 porciones", base:true},
+  {id:"leguminosas",nom:"Leguminosas",           emoji:"🫘", min:1, color:"var(--frijol)",  fondo:"var(--frijol-claro)",  meta:"½ a 1 taza al día", base:true},
+  {id:"cereales",   nom:"Cereales y tubérculos", emoji:"🌽", min:5, color:"var(--maiz)",    fondo:"var(--maiz-claro)",    meta:"5 a 12 porciones, mitad integral", base:true},
+  {id:"animal",     nom:"Origen animal",         emoji:"🥚", min:0, color:"var(--agua)",    fondo:"var(--agua-claro)",    meta:"Cantidades moderadas", base:false},
+  {id:"grasas",     nom:"Grasas saludables",     emoji:"🥑", min:0, color:"#7aa04d",        fondo:"var(--verde-claro)",   meta:"Con medida", base:false}
+];
+var PLATO_REF = [
+  {nom:"Verduras y frutas de temporada", pct:50, color:"var(--verde)"},
+  {nom:"Granos y cereales",              pct:22, color:"var(--maiz)"},
+  {nom:"Leguminosas",                    pct:15, color:"var(--frijol)"},
+  {nom:"Alimentos de origen animal",     pct:8,  color:"var(--agua)"},
+  {nom:"Aceites y grasas saludables",    pct:5,  color:"#7aa04d"}
+];
+var JARRA = [
+  {n:1, txt:"Agua natural", cant:"Al menos 8 vasos"},
+  {n:2, txt:"Leche semidescremada o descremada y bebida de soya sin azúcar añadida", cant:"Máximo 2 vasos"},
+  {n:3, txt:"Café y té sin azúcar", cant:"Hasta 4 tazas de 250 ml"},
+  {n:4, txt:"Bebidas sin calorías con edulcorantes", cant:"Ocasional, hasta 2 vasos"},
+  {n:5, txt:"Jugos de fruta, leche entera, bebidas deportivas y alcohólicas", cant:"Evitar o máximo ½ vaso"},
+  {n:6, txt:"Refrescos y bebidas con azúcar añadida", cant:"Eliminar de la dieta"}
+];
+var DIEZ = [
+  "Durante los primeros 6 meses, los bebés deben recibir solo leche materna; después, complementarla con otros alimentos nutritivos y variados al menos hasta los 2 años.",
+  "Incluir verduras y frutas frescas en todas las comidas, de preferencia de temporada y de producción local.",
+  "Consumir leguminosas a diario: frijoles, lentejas, habas o garbanzos.",
+  "Elegir cereales integrales o de grano entero —tortilla de maíz, avena, arroz— o tubérculos como la papa.",
+  "Comer menos carne de res y evitar las carnes procesadas; en su lugar, más leguminosas y cantidades moderadas de huevo, pollo o pescado.",
+  "Evitar los alimentos ultraprocesados y elegir productos sin sellos de advertencia o con el menor número posible.",
+  "Tomar agua natural a lo largo del día y con las comidas, en lugar de bebidas azucaradas.",
+  "Evitar el consumo de alcohol.",
+  "Hacer más actividad física y reducir el tiempo sentado o frente a pantallas.",
+  "Disfrutar los alimentos en familia o con amigos cuando sea posible, participar en la planeación y preparación, y no desperdiciar alimentos."
+];
+var RAPIDOS = [
+  {n:"Tacos de frijol", g:["leguminosas","cereales"]},
+  {n:"Huevo con nopales", g:["animal","verduras"]},
+  {n:"Caldo de verduras con pollo", g:["verduras","animal"]},
+  {n:"Fruta picada", g:["frutas"]},
+  {n:"Lentejas con verdura", g:["leguminosas","verduras"]},
+  {n:"Avena con fruta", g:["cereales","frutas"]},
+  {n:"Ensalada con garbanzo", g:["verduras","leguminosas"]},
+  {n:"Tortilla con aguacate", g:["cereales","grasas"]},
+  {n:"Pescado con ensalada y arroz", g:["animal","verduras","cereales"]},
+  {n:"Quesadilla con calabacita", g:["animal","cereales","verduras"]}
+];
+var IDEAS_MENU = {
+  desayuno:["Huevo con nopales y frijoles, tortilla de maíz","Avena con fruta picada y cacahuate","Quesadilla de queso fresco con calabacita y salsa","Frijoles refritos con aguacate y tortilla","Licuado de plátano con avena y leche sin azúcar","Chilaquiles de tortilla asada con frijol y verdura"],
+  comida:["Sopa de lentejas con verdura y arroz integral","Tacos de frijol con nopales y pico de gallo","Caldo de pollo con mucha verdura y maíz","Tinga de calabaza con frijol y tortilla","Pescado a la plancha con ensalada y arroz integral","Guisado de habas con nopal y tortilla","Picadillo de verduras con garbanzo"],
+  cena:["Ensalada de verduras con garbanzo y limón","Crema de calabaza con tortilla asada","Sándwich integral con aguacate y jitomate","Caldo de verduras con huevo pochado","Tostadas de frijol con lechuga y salsa","Fruta con yogur natural sin azúcar"]
+};
+var SUGER_ITEMS = [
+  {n:"Frijol en grano 1 kg", g:"leguminosas"},{n:"Lenteja 1 kg", g:"leguminosas"},
+  {n:"Tortilla de maíz 1 kg", g:"cereales"},{n:"Avena 1 kg", g:"cereales"},
+  {n:"Arroz integral 1 kg", g:"cereales"},{n:"Jitomate 1 kg", g:"verduras"},
+  {n:"Nopales 1 kg", g:"verduras"},{n:"Calabaza 1 kg", g:"verduras"},
+  {n:"Zanahoria 1 kg", g:"verduras"},{n:"Plátano 1 kg", g:"frutas"},
+  {n:"Naranja 1 kg", g:"frutas"},{n:"Manzana 1 kg", g:"frutas"},
+  {n:"Huevo 1 kg", g:"animal"},{n:"Pechuga de pollo 1 kg", g:"animal"},
+  {n:"Aceite 1 L", g:"grasas"},{n:"Aguacate 1 kg", g:"grasas"}
+];
+
+/* ═══════════ METAS DEL DÍA ═══════════ */
+var METAS = [
+  {id:"verduras",   nom:"Verduras",   emoji:"🥦", tipo:"porcion", meta:4,  texto:function(n){return n===1?"Te falta 1 porción de verduras":("Te faltan "+n+" porciones de verduras");}},
+  {id:"frutas",     nom:"Frutas",     emoji:"🍎", tipo:"porcion", meta:2,  texto:function(n){return n===1?"Te falta 1 porción de fruta":("Te faltan "+n+" porciones de fruta");}},
+  {id:"leguminosas",nom:"Leguminosas",emoji:"🫘", tipo:"porcion", meta:1,  texto:function(n){return "Hoy aún no hay leguminosas";}},
+  {id:"cereales",   nom:"Cereales",   emoji:"🌽", tipo:"porcion", meta:5,  texto:function(n){return n===1?"Te falta 1 porción de cereal o tubérculo":("Te faltan "+n+" porciones de cereal o tubérculo");}},
+  {id:"agua",       nom:"Agua",       emoji:"💧", tipo:"agua",    meta:8,  texto:function(n){return n===1?"Te falta 1 vaso de agua":("Te faltan "+n+" vasos de agua");}},
+  {id:"mov",        nom:"Movimiento", emoji:"🚶", tipo:"act",     meta:20, texto:function(n){return n===1?"Te falta 1 minuto de movimiento":("Te faltan "+n+" minutos de movimiento");}}
+];
+
+/* ═══════════ LOGROS ═══════════ */
+var LOGROS = [
+  {id:"primero", nom:"Primer paso",      desc:"Registraste tu primera comida", med:"🌱", test:function(s){return totalComidas(s)>=1}},
+  {id:"r3",      nom:"Tres seguidos",    desc:"3 días seguidos con registro", med:"🔥", test:function(s){return racha(s)>=3}},
+  {id:"r7",      nom:"Una semana",       desc:"7 días seguidos con registro", med:"⭐", test:function(s){return racha(s)>=7}},
+  {id:"agua8",   nom:"Bien hidratado",   desc:"Un día con 8 vasos de agua o más", med:"💧", test:function(s){return algunDia(s,function(d){return (d.agua||0)>=8})}},
+  {id:"verd5",   nom:"Puro verde",       desc:"Un día con 5 porciones de verduras", med:"🥦", test:function(s){return algunDia(s,function(d){return porc(d,"verduras")>=5})}},
+  {id:"base4",   nom:"Plato completo",   desc:"Un día con los 4 grupos base al mínimo", med:"🍽", test:function(s){return algunDia(s,function(d){return gruposBase(d)===4})}},
+  {id:"todas",   nom:"Día perfecto",     desc:"Un día con las 6 metas cerradas", med:"🏅", test:function(s){return algunDia(s,function(d){return metasCumplidas(d)===METAS.length})}},
+  {id:"leg5",    nom:"Fiel al frijol",   desc:"5 días con leguminosas", med:"🫘", test:function(s){return cuentaDias(s,function(d){return porc(d,"leguminosas")>=1})>=5}},
+  {id:"act150",  nom:"150 minutos",      desc:"Una semana con 150 min de actividad", med:"🏃", test:function(s){return minSemana(s)>=150}},
+  {id:"tip5",    nom:"Lector constante", desc:"Leíste 5 consejos del mes", med:"📖", test:function(s){return Object.keys(s.tips.vistos||{}).length>=5}},
+  {id:"tip15",   nom:"Medio mes",        desc:"Leíste 15 consejos del mes", med:"📚", test:function(s){return Object.keys(s.tips.vistos||{}).length>=15}},
+  {id:"int5",    nom:"De la idea al plato", desc:"Te comprometiste con 5 consejos", med:"🤝", test:function(s){return Object.keys(s.tips.intentos||{}).length>=5}},
+  {id:"presup",  nom:"Con presupuesto",  desc:"Definiste tu presupuesto de alimentos", med:"💰", test:function(s){return !!(s.presupuesto&&s.presupuesto.monto>0)}},
+  {id:"menu",    nom:"Semana planeada",  desc:"Llenaste al menos 7 espacios del menú", med:"📅", test:function(s){return contarMenu(s)>=7}}
+];
+
+/* ═══════════ ESTADO ═══════════ */
+var LLAVE = "ams_v1";
+var S = null;
+
+function nuevoEstado(){
+  return {perfil:{nombre:"", meta:"Comer más natural", listo:false},
+          dias:{}, presupuesto:{monto:0, periodo:"semanal", items:[]},
+          menu:{}, tips:{vistos:{}, intentos:{}}};
+}
+function cargar(){
+  try{
+    var raw = localStorage.getItem(LLAVE);
+    if(raw){
+      var o = JSON.parse(raw);
+      if(o && typeof o==="object"){
+        S = Object.assign(nuevoEstado(), o);
+        if(!S.tips || typeof S.tips!=="object") S.tips = {vistos:{}, intentos:{}};
+        if(!S.tips.vistos) S.tips.vistos = {};
+        if(!S.tips.intentos) S.tips.intentos = {};
+        /* Si una versión anterior guardó registros de peso, se eliminan:
+           son datos de salud y esta app ya no los trata. */
+        if(S.pesos){ delete S.pesos; guardar(); }
+        return;
+      }
+    }
+  }catch(e){}
+  S = nuevoEstado();
+}
+function guardar(){ try{ localStorage.setItem(LLAVE, JSON.stringify(S)); }catch(e){} }
+
+function hoyKey(d){
+  var f = d || new Date();
+  return f.getFullYear()+"-"+String(f.getMonth()+1).padStart(2,"0")+"-"+String(f.getDate()).padStart(2,"0");
+}
+function dia(k){
+  k = k || hoyKey();
+  if(!S.dias[k]) S.dias[k] = {comidas:[], agua:0, actividad:0, porciones:{}};
+  if(!S.dias[k].porciones) S.dias[k].porciones = {};
+  return S.dias[k];
+}
+function porc(d,g){ return (d && d.porciones && d.porciones[g]) ? d.porciones[g] : 0; }
+function gruposBase(d){ var n=0; GRUPOS.forEach(function(g){ if(g.base && porc(d,g.id)>=g.min) n++; }); return n; }
+function faltaMeta(d,m){
+  if(m.tipo==="porcion") return Math.max(0, m.meta - porc(d,m.id));
+  if(m.tipo==="agua")    return Math.max(0, m.meta - (d.agua||0));
+  return Math.max(0, m.meta - (d.actividad||0));
+}
+function metasCumplidas(d){ var n=0; METAS.forEach(function(m){ if(faltaMeta(d,m)===0) n++; }); return n; }
+function totalComidas(s){ var n=0; for(var k in s.dias){ n += (s.dias[k].comidas||[]).length; } return n; }
+function algunDia(s,fn){ for(var k in s.dias){ if(fn(s.dias[k])) return true; } return false; }
+function cuentaDias(s,fn){ var n=0; for(var k in s.dias){ if(fn(s.dias[k])) n++; } return n; }
+function contarMenu(s){ var n=0; for(var k in s.menu){ for(var c in s.menu[k]){ if((s.menu[k][c]||"").trim()) n++; } } return n; }
+function racha(s){
+  var n=0, f=new Date();
+  for(var i=0;i<400;i++){
+    var d = s.dias[hoyKey(f)];
+    var hay = d && ((d.comidas||[]).length>0 || (d.agua||0)>0 || (d.actividad||0)>0);
+    if(hay){ n++; }
+    else if(i===0){ f.setDate(f.getDate()-1); continue; }
+    else break;
+    f.setDate(f.getDate()-1);
+  }
+  return n;
+}
+function ultimos(n){
+  var a=[], f=new Date(); f.setDate(f.getDate()-(n-1));
+  for(var i=0;i<n;i++){ a.push(hoyKey(f)); f.setDate(f.getDate()+1); }
+  return a;
+}
+function minSemana(s){ var t=0; ultimos(7).forEach(function(k){ if(s.dias[k]) t += (s.dias[k].actividad||0); }); return t; }
+function diasDelMes(){ var f=new Date(); return new Date(f.getFullYear(), f.getMonth()+1, 0).getDate(); }
+function consejoDe(numDia){ return CONSEJOS[(numDia-1) % CONSEJOS.length]; }
+
+/* ═══════════ UTILIDADES ═══════════ */
+function $(id){ return document.getElementById(id); }
+function esc(t){ return String(t==null?"":t).replace(/[&<>"']/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c];}); }
+function dinero(n){ return (Math.round(n*100)/100).toLocaleString("es-MX",{minimumFractionDigits:0,maximumFractionDigits:2}); }
+var tmrToast;
+function toast(msg){
+  var t=$("toast"); t.textContent=msg; t.classList.add("on");
+  clearTimeout(tmrToast); tmrToast=setTimeout(function(){ t.classList.remove("on"); },2000);
+}
+var confirmFn=null;
+function pedirConfirm(titulo,texto,fn){
+  $("confTitulo").textContent=titulo; $("confTexto").textContent=texto;
+  confirmFn=fn; $("modalConfirm").classList.add("on");
+}
+function frase(){
+  var d = new Date();
+  var i = (d.getDate()*3 + d.getHours()) % FRASES.length;
+  return FRASES[i];
+}
+function confeti(){
+  var cols = ["#2f7d5d","#e0a52b","#b2446a","#2b7fa8","#7aa04d"];
+  for(var i=0;i<34;i++){
+    var p = document.createElement("div");
+    p.className = "papelito";
+    p.style.left = (Math.random()*96+2)+"vw";
+    p.style.background = cols[i%cols.length];
+    p.style.animation = "cae "+(1.5+Math.random()*1.2).toFixed(2)+"s linear "+(Math.random()*.4).toFixed(2)+"s forwards";
+    document.body.appendChild(p);
+    setTimeout(function(el){ return function(){ if(el.parentNode) el.parentNode.removeChild(el); }; }(p), 3200);
+  }
+}
+
+/* ═══════════ DONA SVG ═══════════ */
+function dona(svg, partes){
+  var acum=25, h='<circle cx="21" cy="21" r="15.9155" fill="none" stroke="var(--borde)" stroke-width="7"></circle>';
+  partes.forEach(function(p){
+    if(p.pct<=0) return;
+    h += '<circle cx="21" cy="21" r="15.9155" fill="none" stroke="'+p.color+'" stroke-width="7"'
+       + ' stroke-dasharray="'+p.pct+' '+(100-p.pct)+'" stroke-dashoffset="'+acum+'"></circle>';
+    acum = (acum - p.pct + 100) % 100;
+  });
+  svg.innerHTML = h;
+}
+
+/* ═══════════ RENDER: CABECERA ═══════════ */
+function renderCabecera(){
+  var nom = S.perfil.nombre;
+  $("saludo").textContent = nom ? ("Hola, "+nom) : "Hola";
+  var f = new Date();
+  $("fechaHoy").textContent = f.toLocaleDateString("es-MX",{weekday:"long",day:"numeric",month:"long"});
+  var r = racha(S);
+  $("racha").textContent = "🔥 "+r;
+  $("racha").title = r+(r===1?" día seguido":" días seguidos");
+
+  var d = dia(), n = metasCumplidas(d), tot = METAS.length;
+  var pct = Math.round(n/tot*100);
+  $("aroDia").innerHTML =
+    '<svg width="42" height="42" viewBox="0 0 42 42">'
+    + '<circle cx="21" cy="21" r="17" fill="none" stroke="var(--borde)" stroke-width="5"></circle>'
+    + '<circle cx="21" cy="21" r="17" fill="none" stroke="'+(n===tot?"var(--verde)":"var(--maiz)")+'" stroke-width="5"'
+    + ' stroke-linecap="round" stroke-dasharray="'+(pct*1.068).toFixed(1)+' 200"></circle></svg>'
+    + '<span>'+n+'/'+tot+'</span>';
+}
+
+/* ═══════════ RENDER: RECORDATORIO ═══════════ */
+function renderRecordatorio(){
+  var d = dia();
+  var pend = METAS.filter(function(m){ return faltaMeta(d,m)>0; });
+  $("puntoHoy").classList.toggle("on", pend.length>0);
+
+  if(!pend.length){
+    var i = (new Date()).getDate() % FRASES_LISTO.length;
+    $("zonaRecordatorio").innerHTML =
+      '<div class="card listo"><div class="card-t"><h2>🎉 Cerraste tus 6 metas</h2><span class="sub">hoy</span></div>'
+      + '<p style="font-size:13.5px;color:var(--tinta-2)">Verduras, frutas, leguminosas, cereales, agua y movimiento: todo marcado.</p>'
+      + '<p class="frase">'+esc(FRASES_LISTO[i])+'</p>'
+      + '<div style="height:12px"></div><button class="btn peq" id="btnFesteja">Festejar</button></div>';
+    return;
+  }
+
+  var h = (new Date()).getHours();
+  var momento = h<12 ? "Vas temprano: hay tiempo de sobra."
+              : h<18 ? "Vas a media tarde, todavía alcanzas."
+              : "Queda poco del día: ve por lo más fácil primero.";
+  var filas = pend.map(function(m){
+    var n = faltaMeta(d,m);
+    var btn = m.tipo==="porcion" ? '<button class="rec-add" data-g="'+m.id+'" data-dx="1">+1</button>'
+            : m.tipo==="agua"    ? '<button class="rec-add" data-agua="1">+1 vaso</button>'
+            :                      '<button class="rec-add" data-act="10">+10 min</button>';
+    return '<div class="rec-fila"><div class="rec-ico">'+m.emoji+'</div>'
+         + '<div class="rec-txt">'+esc(m.texto(n))+'</div>'+btn+'</div>';
+  }).join("");
+
+  $("zonaRecordatorio").innerHTML =
+    '<div class="card rec"><div class="card-t"><h2>Recordatorio</h2>'
+    + '<span class="sub">'+pend.length+(pend.length===1?" meta pendiente":" metas pendientes")+'</span></div>'
+    + filas
+    + '<p class="frase">'+esc(momento+" "+frase())+'</p></div>';
+}
+
+/* ═══════════ RENDER: HOY ═══════════ */
+function renderGrupos(){
+  var d = dia();
+  $("listaGrupos").innerHTML = GRUPOS.map(function(g){
+    var v = porc(d,g.id);
+    var pct = g.min>0 ? Math.min(100, Math.round(v/g.min*100)) : (v>0?100:0);
+    var ok = g.min>0 && v>=g.min ? '<span class="ok-tag">✓ listo</span>' : "";
+    return '<div class="grupo">'
+      + '<div class="g-emoji" style="background:'+g.fondo+'">'+g.emoji+'</div>'
+      + '<div class="g-info"><div class="g-nom">'+g.nom+ok+'</div>'
+      + '<div class="g-meta">'+g.meta+'</div>'
+      + '<div class="barra"><i style="width:'+pct+'%;background:'+g.color+'"></i></div></div>'
+      + '<div class="g-ctrl">'
+      + '<button class="pill-btn" data-g="'+g.id+'" data-dx="-1" aria-label="Quitar">−</button>'
+      + '<span class="cuenta">'+v+'</span>'
+      + '<button class="pill-btn mas" data-g="'+g.id+'" data-dx="1" aria-label="Agregar">+</button>'
+      + '</div></div>';
+  }).join("");
+}
+function renderPlatoHoy(){
+  var d = dia();
+  var base = GRUPOS.filter(function(g){return g.base});
+  dona($("svgPlato"), base.map(function(g){
+    return {color:g.color, pct: (Math.min(porc(d,g.id), g.min)/g.min)*25};
+  }));
+  var cub = gruposBase(d);
+  $("platoPct").textContent = Math.round(cub/4*100)+"% de la base";
+  $("leyPlato").innerHTML = base.map(function(g){
+    return '<div><span class="pt" style="background:'+g.color+'"></span>'+g.nom+' · <b>'+porc(d,g.id)+'</b>/'+g.min+'</div>';
+  }).join("");
+  var msgs = ["Aún no registras nada hoy. Empieza por lo que ya comiste.",
+              "Vas empezando. Una verdura más y se nota.",
+              "Buen avance: la mitad del camino.",
+              "Ya casi: falta un grupo para completar la base.",
+              "Los cuatro grupos base cubiertos. Así se ve un plato completo."];
+  $("platoMsg").textContent = msgs[cub];
+}
+function renderAgua(){
+  var d = dia();
+  $("aguaN").textContent = d.agua||0;
+  var n = Math.max(8, d.agua||0), h="";
+  for(var i=0;i<n;i++){ h += '<button class="vaso'+(i<(d.agua||0)?" on":"")+'" data-vaso="'+(i+1)+'" aria-label="Vaso '+(i+1)+'"></button>'; }
+  $("vasos").innerHTML = h;
+}
+function renderActividad(){
+  var d = dia(), sem = minSemana(S);
+  $("actHoy").textContent = d.actividad||0;
+  $("actSem").textContent = sem;
+  $("barraAct").style.width = Math.min(100, Math.round(sem/150*100))+"%";
+}
+function renderConsejoHoy(){
+  var nd = (new Date()).getDate();
+  var c = consejoDe(nd);
+  var hk = hoyKey();
+  $("numDia").textContent = "· día "+nd;
+  var datos = c.datos.map(function(x){return '<span class="dato">'+esc(x)+'</span>';}).join("");
+  $("consejoHoy").innerHTML = '<div class="consejo" style="margin:0">'
+    + '<h3>'+esc(c.t)+'</h3><p>'+esc(c.d)+'</p>'+datos
+    + '<span class="fuente">'+esc(c.f)+'</span></div>'
+    + '<p class="frase">'+esc(frase())+'</p>';
+  var ya = !!S.tips.intentos[hk];
+  var b = $("btnIntento");
+  b.textContent = ya ? "✓ Hoy te comprometiste con este consejo" : "Lo intento hoy";
+  b.className = ya ? "btn peq sec" : "btn peq";
+  if(!S.tips.vistos[String(nd)]){ S.tips.vistos[String(nd)] = 1; guardar(); }
+}
+
+/* ═══════════ RENDER: COMIDAS ═══════════ */
+var formComida = {tipo:"Desayuno", grupos:{}, sello:0};
+function renderFormComida(){
+  $("chipsRapidos").innerHTML = RAPIDOS.map(function(r,i){
+    return '<button class="chip mini" data-rapido="'+i+'">'+esc(r.n)+'</button>';
+  }).join("");
+  $("chipsTipo").innerHTML = ["Desayuno","Comida","Cena","Colación"].map(function(t){
+    return '<button class="chip" data-tipo="'+t+'" aria-pressed="'+(formComida.tipo===t)+'">'+t+'</button>';
+  }).join("");
+  $("chipsGrupos").innerHTML = GRUPOS.map(function(g){
+    return '<button class="chip" data-gsel="'+g.id+'" aria-pressed="'+(!!formComida.grupos[g.id])+'">'+g.emoji+" "+g.nom+'</button>';
+  }).join("");
+  Array.prototype.forEach.call($("chipsSellos").children, function(b){
+    b.setAttribute("aria-pressed", String(Number(b.dataset.sello)===formComida.sello));
+  });
+}
+function renderListaComidas(){
+  var d = dia(), c = d.comidas||[];
+  $("nComidas").textContent = c.length + (c.length===1?" registro":" registros");
+  if(!c.length){ $("listaComidas").innerHTML = '<div class="vacio">Todavía no hay comidas de hoy.</div>'; return; }
+  $("listaComidas").innerHTML = c.map(function(m){
+    var noms = (m.grupos||[]).map(function(id){
+      var g = GRUPOS.filter(function(x){return x.id===id})[0];
+      return g ? g.emoji+" "+g.nom : "";
+    }).filter(Boolean).join(" · ");
+    return '<div class="comida"><div class="c-hora">'+esc(m.tipo)+'<br>'+esc(m.hora||"")+'</div>'
+      + '<div class="c-cuerpo"><div class="c-nom">'+esc(m.nombre||"Sin nombre")+'</div>'
+      + (noms?'<div class="c-grupos">'+noms+'</div>':'')
+      + (m.sello?'<span class="tag-sello">CON SELLOS</span>':'')
+      + '</div><button class="borrar" data-del="'+m.id+'">Borrar</button></div>';
+  }).join("");
+}
+
+/* ═══════════ RENDER: AVANCE ═══════════ */
+function renderSemana(){
+  var hk = hoyKey();
+  $("semana").innerHTML = ultimos(7).map(function(k){
+    var d = S.dias[k], n = d ? gruposBase(d) : 0;
+    var f = new Date(k+"T12:00:00");
+    return '<div class="dia-col'+(k===hk?" hoy":"")+'">'
+      + '<div class="dia-barra"><i style="height:'+(Math.round(n/4*100)||3)+'%"></i></div>'
+      + '<div class="dia-lb">'+f.toLocaleDateString("es-MX",{weekday:"short"}).slice(0,3)+'</div></div>';
+  }).join("");
+}
+function renderResumenSem(){
+  var ks = ultimos(7), reg=0, aguaT=0, aguaD=0, comp=0, perf=0, leg=0;
+  var tot = {}; GRUPOS.forEach(function(g){ tot[g.id]=0; });
+  ks.forEach(function(k){
+    var d = S.dias[k]; if(!d) return;
+    if((d.comidas||[]).length) reg++;
+    aguaT += d.agua||0; if((d.agua||0)>=8) aguaD++;
+    if(gruposBase(d)===4) comp++;
+    if(metasCumplidas(d)===METAS.length) perf++;
+    if(porc(d,"leguminosas")>=1) leg++;
+    GRUPOS.forEach(function(g){ tot[g.id] += porc(d,g.id); });
+  });
+  var filas = [
+    ["Días con registro", reg+" de 7"],
+    ["Días con las 6 metas cerradas", perf+" de 7"],
+    ["Días con el plato base completo", comp+" de 7"],
+    ["Promedio de agua", (Math.round(aguaT/7*10)/10)+" vasos al día"],
+    ["Días con 8 vasos o más", aguaD+" de 7"],
+    ["Actividad acumulada", minSemana(S)+" min · meta 150 a 300"],
+    ["Porciones de verduras", tot.verduras],
+    ["Porciones de frutas", tot.frutas],
+    ["Días con leguminosas", leg+" de 7"],
+    ["Consejos que te comprometiste a intentar", Object.keys(S.tips.intentos||{}).length]
+  ];
+  $("resumenSem").innerHTML = filas.map(function(f){
+    return '<div class="grupo" style="padding:9px 0"><div class="g-info"><div class="g-nom" style="font-size:13.5px">'+f[0]+'</div></div>'
+      + '<div style="font-weight:800;font-size:14px">'+f[1]+'</div></div>';
+  }).join("");
+}
+function renderLogros(){
+  var n=0;
+  $("listaLogros").innerHTML = LOGROS.map(function(l){
+    var ok=false; try{ ok = !!l.test(S); }catch(e){}
+    if(ok) n++;
+    return '<div class="logro'+(ok?" on":"")+'"><div class="l-med">'+l.med+'</div>'
+      + '<div><div class="l-nom">'+l.nom+'</div><div class="l-desc">'+l.desc+'</div></div></div>';
+  }).join("");
+  $("nLogros").textContent = n+" de "+LOGROS.length;
+}
+
+/* ═══════════ RENDER: CONSEJOS ═══════════ */
+function renderCalendario(){
+  var f = new Date(), nd = f.getDate(), total = diasDelMes();
+  $("calMes").textContent = f.toLocaleDateString("es-MX",{month:"long",year:"numeric"});
+  var h = "";
+  for(var i=1;i<=total;i++){
+    var visto = !!S.tips.vistos[String(i)];
+    var cls = "cal-d" + (i===nd?" hoy":"") + (visto?" visto":"");
+    var marca = i===nd ? "◆" : (visto ? "●" : "");
+    h += '<button class="'+cls+'" data-caldia="'+i+'">'+i+'<i>'+marca+'</i></button>';
+  }
+  $("cal").innerHTML = h;
+}
+function renderConsejos(){
+  dona($("svgRef"), PLATO_REF.map(function(p){return {color:p.color, pct:p.pct}}));
+  $("leyRef").innerHTML = PLATO_REF.map(function(p){
+    return '<div><span class="pt" style="background:'+p.color+'"></span>'+p.nom+' · <b>'+p.pct+'%</b></div>';
+  }).join("");
+  renderCalendario();
+  $("listaConsejos").innerHTML = CONSEJOS.map(function(c,i){
+    var datos = c.datos.map(function(x){return '<span class="dato">'+esc(x)+'</span>';}).join("");
+    return '<div class="consejo"><h3><span style="color:var(--tinta-2)">Día '+(i+1)+' · </span>'+esc(c.t)+'</h3>'
+      + '<p>'+esc(c.d)+'</p>'+datos+'<span class="fuente">'+esc(c.f)+'</span></div>';
+  }).join("");
+  $("jarra").innerHTML = JARRA.map(function(j){
+    return '<div class="nivel"><div class="n-num">'+j.n+'</div><div class="n-txt">'+esc(j.txt)+'</div>'
+      + '<div class="n-cant">'+esc(j.cant)+'</div></div>';
+  }).join("");
+  $("lista10").innerHTML = DIEZ.map(function(t,i){
+    return '<div class="nivel"><div class="n-num" style="background:var(--verde-claro);color:var(--verde)">'+(i+1)+'</div>'
+      + '<div class="n-txt" style="font-size:13px">'+esc(t)+'</div></div>';
+  }).join("");
+}
+function abrirConsejo(nd){
+  var c = consejoDe(nd);
+  S.tips.vistos[String(nd)] = 1; guardar();
+  $("mcTitulo").textContent = "Día "+nd+" · "+c.t;
+  var datos = c.datos.map(function(x){return '<span class="dato">'+esc(x)+'</span>';}).join("");
+  $("mcCuerpo").innerHTML = '<p style="font-size:14px;color:var(--tinta-2);line-height:1.6">'+esc(c.d)+'</p>'
+    + '<div>'+datos+'</div>'
+    + '<span class="fuente">'+esc(c.f)+'</span>'
+    + '<p class="frase">'+esc(FRASES[(nd*7)%FRASES.length])+'</p>';
+  $("modalConsejo").classList.add("on");
+  renderCalendario(); renderLogros();
+}
+
+/* ═══════════ RENDER: PRESUPUESTO ═══════════ */
+var itemGrupo = "leguminosas";
+function renderPresup(){
+  var p = S.presupuesto;
+  if(document.activeElement !== $("inPresup")) $("inPresup").value = p.monto || "";
+  $("selPeriodo").value = p.periodo || "semanal";
+  $("periodoLb").textContent = p.periodo || "semanal";
+  var total = (p.items||[]).reduce(function(a,i){ return a + i.cant*i.precio; },0);
+  $("gastoTotal").textContent = dinero(total);
+  $("presupTxt").textContent = dinero(p.monto||0);
+  $("barraGasto").style.width = (p.monto>0 ? Math.min(100, Math.round(total/p.monto*100)) : 0)+"%";
+  $("barraGasto").style.background = (p.monto>0 && total>p.monto) ? "var(--jamaica)" : "var(--verde)";
+  if(p.monto>0){
+    var resta = p.monto-total;
+    $("restaTxt").textContent = resta>=0 ? ("te quedan $"+dinero(resta)) : ("te pasaste $"+dinero(-resta));
+    $("restaTxt").style.color = resta>=0 ? "var(--tinta-2)" : "var(--jamaica)";
+  } else { $("restaTxt").textContent = "define tu presupuesto arriba"; }
+
+  var porGrupo = {};
+  (p.items||[]).forEach(function(i){ porGrupo[i.grupo] = (porGrupo[i.grupo]||0) + i.cant*i.precio; });
+  $("repart").innerHTML = GRUPOS.map(function(g){
+    var v = porGrupo[g.id]||0;
+    if(!v) return "";
+    return '<div class="rep-fila"><span style="width:84px;flex-shrink:0">'+g.emoji+' '+g.nom.split(" ")[0]+'</span>'
+      + '<span class="rep-barra"><i style="width:'+(total?Math.round(v/total*100):0)+'%;background:'+g.color+'"></i></span>'
+      + '<span style="width:62px;text-align:right">$'+dinero(v)+'</span></div>';
+  }).join("");
+
+  $("chipsGrupoItem").innerHTML = GRUPOS.map(function(g){
+    return '<button class="chip mini" data-gitem="'+g.id+'" aria-pressed="'+(itemGrupo===g.id)+'">'+g.emoji+" "+g.nom+'</button>';
+  }).join("");
+
+  var items = p.items||[];
+  var sug = '<div class="chips" style="margin-top:12px">'
+    + SUGER_ITEMS.map(function(s){return '<button class="chip mini" data-sug="'+esc(s.n)+'" data-sugg="'+s.g+'">+ '+esc(s.n)+'</button>';}).join("")
+    + '</div>';
+  $("nItems").textContent = items.length + (items.length===1?" producto":" productos");
+  if(!items.length){
+    $("listaItems").innerHTML = '<div class="vacio">Tu lista está vacía. Agrega productos con su precio real.</div>'+sug;
+  } else {
+    $("listaItems").innerHTML = items.map(function(i){
+      var g = GRUPOS.filter(function(x){return x.id===i.grupo})[0];
+      return '<div class="item"><div class="i-nom">'+esc(i.nombre)
+        + '<div class="i-sub">'+(g?g.emoji+" "+g.nom:"")+' · '+i.cant+' × $'+dinero(i.precio)+'</div></div>'
+        + '<div class="i-precio">$'+dinero(i.cant*i.precio)+'</div>'
+        + '<button class="borrar" data-delitem="'+i.id+'">✕</button></div>';
+    }).join("") + sug;
+  }
+}
+var DIAS_SEM = [["lun","Lunes"],["mar","Martes"],["mie","Miércoles"],["jue","Jueves"],["vie","Viernes"],["sab","Sábado"],["dom","Domingo"]];
+function renderMenu(){
+  if(document.activeElement && document.activeElement.dataset && document.activeElement.dataset.md) return;
+  $("menuSem").innerHTML = DIAS_SEM.map(function(d){
+    var m = S.menu[d[0]] || {};
+    return '<div class="menu-dia"><h4>'+d[1]+'</h4>'
+      + ["desayuno","comida","cena"].map(function(c){
+          return '<div class="menu-l"><span>'+c+'</span><input data-md="'+d[0]+'" data-mc="'+c+'" value="'+esc(m[c]||"")+'" placeholder="—" maxlength="70"></div>';
+        }).join("") + '</div>';
+  }).join("");
+}
+function llenarIdeas(){
+  DIAS_SEM.forEach(function(d,i){
+    if(!S.menu[d[0]]) S.menu[d[0]] = {};
+    ["desayuno","comida","cena"].forEach(function(c,j){
+      if(!(S.menu[d[0]][c]||"").trim()){
+        var arr = IDEAS_MENU[c];
+        S.menu[d[0]][c] = arr[(i+j*2+Math.floor(Math.random()*arr.length)) % arr.length];
+      }
+    });
+  });
+  guardar(); renderMenu(); renderLogros();
+  toast("Ideas agregadas a los espacios vacíos");
+}
+
+/* ═══════════ RENDER GLOBAL ═══════════ */
+function renderHoy(){
+  renderCabecera(); renderRecordatorio(); renderGrupos(); renderPlatoHoy();
+  renderAgua(); renderActividad(); renderConsejoHoy();
+}
+function renderTodo(){
+  renderHoy();
+  renderFormComida(); renderListaComidas();
+  renderSemana(); renderResumenSem(); renderLogros();
+  renderConsejos(); renderPresup(); renderMenu();
+}
+
+/* ═══════════ NAVEGACIÓN ═══════════ */
+var VISTAS = ["hoy","comidas","avance","consejos","dinero","legal"];
+function irA(v){
+  if(VISTAS.indexOf(v)<0) v="hoy";
+  VISTAS.forEach(function(x){ var el=$("v-"+x); if(el) el.classList.toggle("on", x===v); });
+  Array.prototype.forEach.call(document.querySelectorAll(".nav-b"), function(b){
+    b.setAttribute("aria-current", String(b.dataset.v===v));
+  });
+  try{ if(location.hash.replace("#","")!==v) history.replaceState(null,"","#"+v); }catch(e){}
+  window.scrollTo({top:0,behavior:"smooth"});
+}
+
+/* ═══════════ EVENTOS ═══════════ */
+function tocoMeta(){ renderCabecera(); renderRecordatorio(); }
+
+document.addEventListener("click", function(ev){
+  var t = ev.target.closest("button");
+  if(!t) return;
+
+  if(t.dataset.v){ irA(t.dataset.v); return; }
+  if(t.id==="btnLegal"){ irA("legal"); return; }
+  if(t.id==="btnVerCal"){ irA("consejos"); return; }
+
+  /* porciones (también desde el recordatorio) */
+  if(t.dataset.g){
+    var d = dia(), id = t.dataset.g;
+    var antes = metasCumplidas(d);
+    d.porciones[id] = Math.max(0, Math.min(40, porc(d,id)+Number(t.dataset.dx)));
+    guardar(); renderGrupos(); renderPlatoHoy(); tocoMeta();
+    renderSemana(); renderResumenSem(); renderLogros();
+    if(metasCumplidas(d)===METAS.length && antes<METAS.length) confeti();
+    return;
+  }
+  /* agua */
+  if(t.dataset.agua || t.dataset.vaso){
+    var d2 = dia(), antes2 = metasCumplidas(d2);
+    if(t.dataset.vaso){
+      var v = Number(t.dataset.vaso);
+      d2.agua = (d2.agua===v) ? v-1 : v;
+    } else {
+      d2.agua = Math.max(0, Math.min(30, (d2.agua||0)+Number(t.dataset.agua)));
+    }
+    guardar(); renderAgua(); tocoMeta(); renderResumenSem(); renderLogros();
+    if(metasCumplidas(d2)===METAS.length && antes2<METAS.length) confeti();
+    return;
+  }
+  /* actividad */
+  if(t.dataset.act){
+    var d3 = dia(), antes3 = metasCumplidas(d3);
+    d3.actividad = Math.max(0, Math.min(600, (d3.actividad||0)+Number(t.dataset.act)));
+    guardar(); renderActividad(); tocoMeta(); renderResumenSem(); renderLogros();
+    if(metasCumplidas(d3)===METAS.length && antes3<METAS.length) confeti();
+    return;
+  }
+  if(t.id==="btnFesteja"){ confeti(); toast("¡Bien hecho!"); return; }
+
+  /* consejos */
+  if(t.id==="btnIntento"){
+    var hk = hoyKey();
+    if(S.tips.intentos[hk]){ toast("Ya te comprometiste hoy"); return; }
+    S.tips.intentos[hk] = (new Date()).getDate();
+    guardar(); renderConsejoHoy(); renderLogros(); renderResumenSem();
+    toast("Anotado. Un consejo a la vez.");
+    return;
+  }
+  if(t.dataset.caldia){ abrirConsejo(Number(t.dataset.caldia)); return; }
+  if(t.id==="mcIntento"){
+    var hk2 = hoyKey();
+    S.tips.intentos[hk2] = (new Date()).getDate();
+    guardar(); $("modalConsejo").classList.remove("on");
+    renderConsejoHoy(); renderLogros(); renderResumenSem();
+    toast("Anotado para hoy");
+    return;
+  }
+  if(t.id==="mcCerrar"){ $("modalConsejo").classList.remove("on"); return; }
+
+  /* comidas */
+  if(t.dataset.rapido){
+    var r = RAPIDOS[Number(t.dataset.rapido)];
+    $("inNombre").value = r.n;
+    formComida.grupos = {};
+    r.g.forEach(function(g){ formComida.grupos[g] = true; });
+    renderFormComida();
+    toast("Listo, revisa y guarda");
+    return;
+  }
+  if(t.dataset.tipo){ formComida.tipo = t.dataset.tipo; renderFormComida(); return; }
+  if(t.dataset.gsel){ formComida.grupos[t.dataset.gsel] = !formComida.grupos[t.dataset.gsel]; renderFormComida(); return; }
+  if(t.dataset.sello!==undefined && t.parentElement && t.parentElement.id==="chipsSellos"){
+    formComida.sello = Number(t.dataset.sello); renderFormComida(); return;
+  }
+  if(t.id==="btnGuardar"){
+    var nombre = $("inNombre").value.trim();
+    var sel = Object.keys(formComida.grupos).filter(function(k){return formComida.grupos[k]});
+    if(!nombre && !sel.length){ toast("Escribe qué comiste o marca un grupo"); return; }
+    var d4 = dia(), antes4 = metasCumplidas(d4), ahora = new Date();
+    d4.comidas.push({id:"c"+Date.now(), tipo:formComida.tipo, nombre:nombre||formComida.tipo,
+      grupos:sel, sello:formComida.sello,
+      hora:String(ahora.getHours()).padStart(2,"0")+":"+String(ahora.getMinutes()).padStart(2,"0")});
+    sel.forEach(function(id){ d4.porciones[id] = Math.min(40, porc(d4,id)+1); });
+    formComida = {tipo:formComida.tipo, grupos:{}, sello:0};
+    $("inNombre").value = "";
+    guardar(); renderTodo(); toast("Comida registrada");
+    if(metasCumplidas(d4)===METAS.length && antes4<METAS.length) confeti();
+    return;
+  }
+  if(t.dataset.del){
+    var d5 = dia(), idd = t.dataset.del;
+    var m = (d5.comidas||[]).filter(function(x){return x.id===idd})[0];
+    if(m){ (m.grupos||[]).forEach(function(g){ d5.porciones[g] = Math.max(0, porc(d5,g)-1); }); }
+    d5.comidas = (d5.comidas||[]).filter(function(x){return x.id!==idd});
+    guardar(); renderTodo(); return;
+  }
+
+  /* presupuesto */
+  if(t.id==="btnPresup"){
+    var mo = parseFloat($("inPresup").value);
+    S.presupuesto.monto = (mo>0 ? Math.round(mo*100)/100 : 0);
+    S.presupuesto.periodo = $("selPeriodo").value;
+    guardar(); renderPresup(); renderLogros(); toast("Presupuesto guardado"); return;
+  }
+  if(t.dataset.gitem){ itemGrupo = t.dataset.gitem; renderPresup(); return; }
+  if(t.dataset.sug){
+    $("inItem").value = t.dataset.sug; itemGrupo = t.dataset.sugg;
+    renderPresup(); $("inPrecio").focus(); return;
+  }
+  if(t.id==="btnItem"){
+    var nom = $("inItem").value.trim();
+    var cant = parseFloat($("inCant").value), pre = parseFloat($("inPrecio").value);
+    if(!nom){ toast("Escribe el nombre del producto"); return; }
+    if(!(cant>0)) cant = 1;
+    if(!(pre>=0)){ toast("Escribe el precio que viste"); return; }
+    S.presupuesto.items = S.presupuesto.items||[];
+    S.presupuesto.items.push({id:"i"+Date.now(), nombre:nom, grupo:itemGrupo, cant:cant, precio:Math.round(pre*100)/100});
+    $("inItem").value=""; $("inPrecio").value=""; $("inCant").value="1";
+    guardar(); renderPresup(); toast("Agregado a la lista"); return;
+  }
+  if(t.dataset.delitem){
+    S.presupuesto.items = (S.presupuesto.items||[]).filter(function(x){return x.id!==t.dataset.delitem});
+    guardar(); renderPresup(); return;
+  }
+  if(t.id==="btnLimpiarLista"){
+    pedirConfirm("Vaciar la lista","Se borran los productos y precios que capturaste. Tu presupuesto se queda.",function(){
+      S.presupuesto.items = []; guardar(); renderPresup(); toast("Lista vacía");
+    });
+    return;
+  }
+  if(t.id==="btnIdeas"){ llenarIdeas(); return; }
+
+  /* copiar */
+  if(t.id==="btnCopiar"){
+    var d6 = dia(), lin = ["Mi día — "+(new Date()).toLocaleDateString("es-MX")];
+    lin.push("Metas cerradas: "+metasCumplidas(d6)+" de "+METAS.length);
+    GRUPOS.forEach(function(g){ lin.push(g.nom+": "+porc(d6,g.id)+(g.min>0?" / "+g.min+" mínimo":"")); });
+    lin.push("Agua: "+(d6.agua||0)+" vasos (meta 8 o más)");
+    lin.push("Actividad: "+(d6.actividad||0)+" min hoy, "+minSemana(S)+" min esta semana (meta 150 a 300)");
+    lin.push("Comidas registradas: "+(d6.comidas||[]).length);
+    lin.push("");
+    lin.push("Referencias: Guías Alimentarias Saludables y Sostenibles (SSA/INSP) y OMS. Herramienta auxiliar, sin valor diagnóstico.");
+    try{
+      navigator.clipboard.writeText(lin.join("\n")).then(
+        function(){ toast("Resumen copiado"); },
+        function(){ toast("No se pudo copiar aquí"); });
+    }catch(e){ toast("No se pudo copiar aquí"); }
+    return;
+  }
+
+  /* bienvenida */
+  if(t.dataset.meta){
+    S.perfil.meta = t.dataset.meta;
+    Array.prototype.forEach.call($("chipsMeta").children, function(b){
+      b.setAttribute("aria-pressed", String(b.dataset.meta===t.dataset.meta));
+    });
+    return;
+  }
+  if(t.id==="btnEmpezar"){
+    S.perfil.nombre = $("inNombreUser").value.trim().slice(0,24);
+    S.perfil.listo = true; guardar();
+    $("modalBienvenida").classList.remove("on");
+    renderTodo(); return;
+  }
+
+  /* confirmación */
+  if(t.id==="confSi"){
+    $("modalConfirm").classList.remove("on");
+    if(confirmFn){ var fn=confirmFn; confirmFn=null; fn(); }
+    return;
+  }
+  if(t.id==="confNo"){ $("modalConfirm").classList.remove("on"); confirmFn=null; return; }
+
+  /* acceso y portabilidad: copiar todo en texto plano */
+  if(t.id==="btnCopiarTodo"){
+    var L = ["MIS DATOS EN «AYUDA A MI SALUD»",
+             "Copiado el "+(new Date()).toLocaleString("es-MX"),
+             "Todo esto estaba guardado solo en este dispositivo.",""];
+    L.push("PERFIL");
+    L.push("  Nombre o apodo: "+(S.perfil.nombre||"(no lo escribiste)"));
+    L.push("  Objetivo elegido: "+(S.perfil.meta||"—"));
+    L.push("");
+    L.push("REGISTRO DE HÁBITOS POR DÍA");
+    var claves = Object.keys(S.dias).sort();
+    if(!claves.length){ L.push("  (sin registros)"); }
+    claves.forEach(function(k){
+      var d = S.dias[k];
+      L.push("  "+k);
+      GRUPOS.forEach(function(g){ if(porc(d,g.id)) L.push("    "+g.nom+": "+porc(d,g.id)); });
+      if(d.agua) L.push("    Agua: "+d.agua+" vasos");
+      if(d.actividad) L.push("    Movimiento: "+d.actividad+" min");
+      (d.comidas||[]).forEach(function(m){
+        L.push("    "+(m.hora||"")+" "+m.tipo+": "+m.nombre+(m.sello?" [con sellos]":""));
+      });
+    });
+    L.push("");
+    L.push("PRESUPUESTO DE ALIMENTOS");
+    L.push("  Monto "+(S.presupuesto.periodo||"")+": $"+dinero(S.presupuesto.monto||0));
+    (S.presupuesto.items||[]).forEach(function(i){
+      L.push("  - "+i.nombre+" · "+i.cant+" × $"+dinero(i.precio)+" = $"+dinero(i.cant*i.precio));
+    });
+    if(!(S.presupuesto.items||[]).length) L.push("  (lista vacía)");
+    L.push("");
+    L.push("MENÚ DE LA SEMANA");
+    var hayMenu = false;
+    DIAS_SEM.forEach(function(ds){
+      var m = S.menu[ds[0]] || {};
+      ["desayuno","comida","cena"].forEach(function(c){
+        if((m[c]||"").trim()){ hayMenu = true; L.push("  "+ds[1]+" · "+c+": "+m[c]); }
+      });
+    });
+    if(!hayMenu) L.push("  (sin menú)");
+    L.push("");
+    L.push("CONSEJOS");
+    L.push("  Días leídos: "+Object.keys(S.tips.vistos||{}).length);
+    L.push("  Días en que te comprometiste con el consejo: "+Object.keys(S.tips.intentos||{}).length);
+    L.push("");
+    L.push("No hay datos de salud en este archivo: la app no los pide ni los guarda.");
+    try{
+      navigator.clipboard.writeText(L.join("\n")).then(
+        function(){ toast("Todos tus datos están copiados"); },
+        function(){ toast("No se pudo copiar aquí"); });
+    }catch(e){ toast("No se pudo copiar aquí"); }
+    return;
+  }
+  if(t.id==="btnBorrarRegistros"){
+    pedirConfirm("Borrar mis registros de hábitos","Se eliminan las comidas, porciones, agua y movimiento de todos los días. Tu presupuesto, tu menú y tus consejos se quedan.",function(){
+      S.dias = {}; guardar(); renderTodo(); toast("Registros borrados");
+    });
+    return;
+  }
+  if(t.id==="btnBorrarDinero"){
+    pedirConfirm("Borrar presupuesto y menú","Se eliminan tu monto, tu lista de compras y tu menú de la semana. Tus registros de hábitos se quedan.",function(){
+      S.presupuesto = {monto:0, periodo:"semanal", items:[]};
+      S.menu = {};
+      guardar(); renderTodo(); toast("Presupuesto y menú borrados");
+    });
+    return;
+  }
+
+  if(t.id==="btnBorrar"){
+    pedirConfirm("Borrar todos mis datos","Se eliminan tus registros de comidas, agua, actividad, presupuesto, menú y consejos de este dispositivo. No se puede deshacer.",function(){
+      try{ localStorage.removeItem(LLAVE); }catch(e){}
+      S = nuevoEstado(); renderTodo(); irA("hoy");
+      $("modalBienvenida").classList.add("on"); toast("Datos borrados");
+    });
+    return;
+  }
+});
+
+document.addEventListener("input", function(ev){
+  var el = ev.target;
+  if(el.dataset && el.dataset.md){
+    if(!S.menu[el.dataset.md]) S.menu[el.dataset.md] = {};
+    S.menu[el.dataset.md][el.dataset.mc] = el.value.slice(0,70);
+    guardar();
+  }
+});
+document.addEventListener("change", function(ev){
+  if(ev.target.id==="selPeriodo"){ S.presupuesto.periodo = ev.target.value; guardar(); renderPresup(); }
+});
+window.addEventListener("hashchange", function(){ irA(location.hash.replace("#","")); });
+document.addEventListener("visibilitychange", function(){ if(!document.hidden) renderHoy(); });
+
+/* ═══════════ ARRANQUE ═══════════ */
+cargar();
+renderTodo();
+irA((location.hash||"#hoy").replace("#",""));
+if(!S.perfil.listo){ $("modalBienvenida").classList.add("on"); }
+
+/* Service worker: solo sirve para que la app abra sin internet.
+   No manda nada a ningún servidor. Si el navegador no lo permite, la app
+   sigue funcionando igual, nada más que necesitará conexión la primera vez. */
+if("serviceWorker" in navigator){
+  window.addEventListener("load", function(){
+    try{ navigator.serviceWorker.register("sw.js").catch(function(){}); }catch(e){}
+  });
+}
+
+})();
+</script>
+</body>
+</html>
