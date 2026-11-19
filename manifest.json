@@ -1,7 +1,7 @@
 {
-  "name": "Ayuda a mi salud",
-  "short_name": "Mi salud",
-  "description": "Herramienta auxiliar para registrar tus comidas, tu agua y tu movimiento, con consejos de fuentes oficiales y un organizador de presupuesto de alimentos. No es un dispositivo médico y no solicita datos de salud.",
+  "name": "Milpa",
+  "short_name": "Milpa",
+  "description": "Milpa es una herramienta auxiliar para registrar tus comidas, tu agua y tu movimiento, con consejos de fuentes oficiales y un organizador de presupuesto de alimentos. No es un dispositivo médico y no solicita datos de salud.",
   "lang": "es-MX",
   "dir": "ltr",
   "start_url": "./",
